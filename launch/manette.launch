@@ -1,0 +1,3 @@
+<launch>
+  <node name="Manette" pkg="drone" type="Manette" output="screen" required="true"  launch-prefix="sudo -E"/>
+</launch>

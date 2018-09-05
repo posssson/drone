@@ -1,0 +1,2 @@
+g++ -Wall MPU9250.cpp I2Cdev.cpp Calibration.cpp -lwiringPi
+

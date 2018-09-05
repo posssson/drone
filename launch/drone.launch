@@ -1,0 +1,9 @@
+<launch>
+  <node name="Init" pkg="drone" type="Init" output="screen" required="true"  launch-prefix="sudo -E"/>
+  <node name="Capteurs" pkg="drone" type="Capteurs" output="screen" required="true" launch-prefix="sudo -E"/>
+  <node name="Servos" pkg="drone" type="Servos" output="screen" required="true" launch-prefix="sudo -E"/>
+  <!--   <node name="Clavier" pkg="drone" type="Clavier" output="screen" required="true" launch-prefix="sudo -E"/> -->
+ 
+    <node name="Optim" pkg="drone" type="Optim" output="screen" required="true" launch-prefix="sudo -E"/>
+	   <node name="Gps" pkg="drone" type="Gps" output="screen" required="true" launch-prefix="sudo -E"/>
+</launch>
