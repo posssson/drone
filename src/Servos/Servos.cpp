@@ -14,20 +14,6 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "Servos");
 	ros::NodeHandle n;
 
-	int recu_init = 0;
-	float attitude[5];
-	float consigne[4]= { 0, 0, 0, 0 };
-	float clavier[3];
-float erreur[3] = { 0,0,0 }, erreur_precedente[3] = { 0,0,0 }, commande[3] = { 0,0,0 }, variation_erreur[3] = { 0,0,0 }, somme_erreurs[3] = {0,0,0 };
-	float erreur_vit[3] = { 0,0,0 }, erreur_precedente_vit[3] = { 0,0,0 }, commande_vit[3] = { 0,0,0 }, variation_erreur_vit[3] = { 0,0,0 }, somme_erreurs_vit[3] = {0,0,0 };
-	float Kp[3] = { 3.2 ,3.2, 3}, Ki_default[3] = { 0.000,0.000,0.000 }, Kd_default[3] = { 0.011,0.011,0 };
-	float Kp_vit[3]={3,3,0},Ki_vit_default[3]={0.00117,0.00117,0.000},Kd_vit_default[3]={0.023,0.023,0.004};
-	float  Ki[3], Kd[3];
-	float Ki_vit[3],Kd_vit[3];
-	int optim = 0;
-	float erreur_gaz = 0, gaz_actuel = 0;
-	int premiere_erreur = 1;
-
 double time_in_mill = 0, temps_proc = 0;
 
 struct timeval  tv;
