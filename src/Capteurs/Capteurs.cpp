@@ -153,7 +153,7 @@ void loop()
 	angley = 0.98*(angley - (float)(gx)*temps_proc )  + 0.02 * angle_accel_y;
 	
 	// Calcul du lacet avec le magnétometre
-	anglez = atan(my/mx);
+	anglez = 57.2958*atan(my/mx);
 	
 	if(temps_proc != 0) {
 		vitx = (anglex - anglex_prec)/temps_proc;
