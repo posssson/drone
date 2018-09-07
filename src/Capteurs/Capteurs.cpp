@@ -95,20 +95,20 @@ rslt = bme280_init(&dev);*/
 static void printData(){
 
   // print the data
-  printf("ax  =%6.6f\n", ax);
+/*  printf("ax  =%6.6f\n", ax);
   printf("ay  =%6.6f\n", ay);
   printf("az  =%6.6f\n", az);
 
-  printf("%gx  =6.6f\n", gx);
+  printf("gx   =%6.6f\n", gx);
   printf("gy   =%6.6f\n", gy);
   printf("gz   =%6.6f\n", gz);
 
   printf("mx  =%6.6f\n", mx);
   printf("my  =%6.6f\n", my);
-  printf("mz  =%6.6f\n", mz);
+  printf("mz  =%6.6f\n", mz);*/
   
   printf("anglez  =%6.6f\n", anglez);
-  printf("temps_proc  =%f\n", temps_proc);
+  //printf("temps_proc  =%f\n", temps_proc);
 
 
 }
