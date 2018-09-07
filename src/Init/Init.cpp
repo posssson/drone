@@ -19,7 +19,7 @@ while (ros::ok()) {
 	ss << "Initialisation finie " ;
 	msg.data = ss.str();
 	chatter_pub.publish(msg);
-	system("raspivid -o ~/Camera/video_vol.h264 -vf -t 1000000000");
+	//system("raspivid -o ~/Camera/video_vol.h264 -vf -t 1000000000");
         ros::spin();
 	}
 	return 0;

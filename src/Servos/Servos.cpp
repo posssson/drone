@@ -113,7 +113,7 @@ struct timeval  tv;
 		}
 
 			// Calcul PID Commande GAZ //TODO
-			gaz += (-gaz_actuel + temps_haut_gaz)*0.0015;
+			gaz += (-gaz_actuel + temps_haut_gaz)*0.15;
 			//ROS_INFO("GAZ = %f",gaz);
 			gaz_actuel = gaz;
 
@@ -183,8 +183,8 @@ struct timeval  tv;
 			//ROS_INFO("temps_proc  =  %lf",temps_proc);
 			//ROS_INFO("commande[tangage] = %f   attitude[4]= %f",commande[tangage] ,attitude[4]);
 			//ROS_INFO("commande roulis %f",commande[roulis]);
-			ROS_INFO("attitude[tangage] %f",attitude[tangage]);
-			ROS_INFO("attitude[roulis] %f",attitude[roulis]);
+			///ROS_INFO("attitude[tangage] %f",attitude[tangage]);
+			//ROS_INFO("attitude[roulis] %f",attitude[roulis]);
 			//ROS_INFO("commande_vit[roulis] %f",commande_vit[roulis]);
 			//ROS_INFO("commande_vit[tangage] %f",commande_vit[tangage]);
 			//ROS_INFO("commande_devant_droit %f",commande_devant_droit);
@@ -197,18 +197,18 @@ struct timeval  tv;
 			if (arret == 0 && gaz <1100)
 			{
 				arret = 1;
-				ROS_INFO("ENLEVER SECURITE");
+				ROS_INFO(" SECURITE ENLEVER");
 			}
 
 			calcul_valeur_commande_moteur();
 
 			// Sécurité sur les angles pour les tests 
-			if ((abs( attitude[tangage]) > 15 || abs( attitude[roulis])>15) && arret == 1)
+			if ((abs( attitude[tangage]) > 25 || abs( attitude[roulis])>25) && arret == 1)
 				{
 					// SECURITE DE TEST
-					/*ROS_INFO("MISE EN SECURITE");
+					ROS_INFO("MISE EN SECURITE");
 					ROS_INFO("attitude[tangage] = %f",attitude[tangage]);
-					ROS_INFO("attitude[roulis] = %f",attitude[roulis]);*/
+					ROS_INFO("attitude[roulis] = %f",attitude[roulis]);
 					arret = 0;
 
 				}

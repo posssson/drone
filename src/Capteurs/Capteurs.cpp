@@ -14,7 +14,7 @@
 #include <iostream>
 #include <fstream>
 using namespace std;
-
+//#include "bme280.h"
 #include "I2Cdev.h"
 #include "MPU9250.h"
 #include <wiringPi.h>
@@ -54,7 +54,14 @@ struct timespec time_actuel,ancien_temps,temps_attente,temps_attente_nanosleep;
 
 
 int it = 0;
-	
+
+// Capteur altitude
+/*struct bme280_dev dev;
+int8_t rslt = BME280_OK;*/
+
+
+
+
 
  
 void setup()
@@ -76,22 +83,33 @@ void setup()
 	int reset = 0;
 	mpu.begin(ACCEL_RANGE_8G,GYRO_RANGE_1000DPS);
 	
+	//Altitude
+/*	dev.dev_id = BME280_I2C_ADDR_PRIM;
+dev.intf = BME280_I2C_INTF;
+dev.read = user_i2c_read;
+dev.write = user_i2c_write;
+dev.delay_ms = user_delay_ms;
+rslt = bme280_init(&dev);*/
 }
 
 static void printData(){
 
   // print the data
-  printf("%6.6f\t", ax);
-  printf("%6.6f\t", ay);
-  printf("%6.6f\t", az);
+  printf("ax  =%6.6f\n", ax);
+  printf("ay  =%6.6f\n", ay);
+  printf("az  =%6.6f\n", az);
 
-  printf("%6.6f\t", gx);
-  printf("%6.6f\t", gy);
-  printf("%6.6f\t", gz);
+  printf("%gx  =6.6f\n", gx);
+  printf("gy   =%6.6f\n", gy);
+  printf("gz   =%6.6f\n", gz);
 
-  printf("%6.6f\t", mx);
-  printf("%6.6f\t", my);
-  printf("%6.6f\t", mz);
+  printf("mx  =%6.6f\n", mx);
+  printf("my  =%6.6f\n", my);
+  printf("mz  =%6.6f\n", mz);
+  
+  printf("anglez  =%6.6f\n", anglez);
+  printf("temps_proc  =%f\n", temps_proc);
+
 
 }
 void loop()
@@ -134,13 +152,14 @@ void loop()
 	anglex = 0.98*(anglex - (float)(gy)*temps_proc )  + 0.02 * angle_accel_x;
 	angley = 0.98*(angley - (float)(gx)*temps_proc )  + 0.02 * angle_accel_y;
 	
-//printf("anglex        %f\n", anglex);
+	// Calcul du lacet avec le magnétometre
+	anglez = atan(my/mx);
 	
-	anglez = (anglez + float(gz)*temps_proc );
-if(temps_proc != 0) {
-	vitx = (anglex - anglex_prec)/temps_proc;
-	vity = (angley - angley_prec)/temps_proc;
-}
+	if(temps_proc != 0) {
+		vitx = (anglex - anglex_prec)/temps_proc;
+		vity = (angley - angley_prec)/temps_proc;
+	}
+	
 	anglex_prec = anglex;
 	angley_prec = angley;
 	
@@ -149,30 +168,6 @@ if(temps_proc != 0) {
 		anglex = 0;
 		angley = 0;
 	}
-	
-	/*printf("anglex        %f\n", anglex);
-	printf("accelx        %f\n", ax);
-	printf("accely        %f\n", ay);
-	printf("accelz        %f\n", az);
-	printf("ax                %f\n", ax);
-	printf("avant_filtrage_ax %f\n", avant_filtrage_ax);*/
-	
-	/*printf("angle_accel_x %f\n", angle_accel_x);
-	printf("anglex        %f\n", anglex);
-	printf("angle_accel_y %f\n", angle_accel_y);
-	printf("angley        %f\n", angley);*/
-	
-/*/std::cout <<""<< std::endl;
-std::cout << "angle ax =  "<<anglex << std::endl;
-std::cout << "angle ay =  "<<angley << std::endl;*/
-/*std::cout << "angle gx =  "<<gx << std::endl;
-std::cout << "angle gy =  "<<gy << std::endl;
-  printf("ax %f\t", ax);
-  printf("ay %f\t", ay);
-  printf("az %f\t", az);*/
-  //printf("angle gx vitx = %f    %f\n",gy,vitx);
-  //printf("angle gy vity = %f    %f\n",-gx,vity);
-	//ROS_INFO("angle roulis tangage vit roulis tangage  %f  %f %f  %f", anglex, angley, vitx,vity);
 }
 
 void recuperation_initialisation(const std_msgs::String::ConstPtr& msg, int *recu_init) // vérification initialisation
@@ -210,10 +205,10 @@ ofstream fichier("/home/pi/drone_ws/src/drone/src/donnees_accelero.txt", ios::ou
 			//MDP
 			msg_attitude.x = anglex; // tangage
 			msg_attitude.y = angley; // roulis 
-			msg_attitude.z = 0;
+			msg_attitude.z = anglez; // lacet calculer avec le magnétometre
 			msg_attitude.vx = -gy;  
 			msg_attitude.vy = -gx ;
-			//printData();
+			printData();
 			_pub_msg_attitude.publish(msg_attitude);
 		}
 		ros::spinOnce();
