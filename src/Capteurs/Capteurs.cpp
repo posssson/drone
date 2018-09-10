@@ -9,18 +9,23 @@
 #include "drone/Capteurs_msg.h"
 #include <signal.h>
 #include <unistd.h>
-#include <math.h>
 #include <time.h>
 #include <iostream>
 #include <fstream>
 using namespace std;
-//#include "bme280.h"
+#include "bme280.c"
 #include "I2Cdev.h"
 #include "MPU9250.h"
 #include <wiringPi.h>
 #include "../Common/LowPassFilter2p.hpp"
 #include "../Common/Biquad.h"
 #include "MadgwickAHRS.c"
+
+#include <errno.h>
+#include <wiringPiI2C.h>
+
+
+
 // class default I2C address is 0x68
 // specific I2C addresses may be passed as a parameter here
 // AD0 low = 0x68 (default for InvenSense evaluation board)
@@ -35,7 +40,6 @@ math::LowPassFilter2p LPFGyro_y(1000, 50);
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz;
-float t; // temperature
 int i = 1;
 float gyroScale = 131;
 float arx, ary, arz, grx, gry, grz, gsx, gsy, gsz;
@@ -61,11 +65,18 @@ Biquad *lpFilterX = new Biquad(); // create a Biquad, lpFilter;
 Biquad *lpFilterY = new Biquad(); // create a Biquad, lpFilter;
 Biquad *lpFilterZ = new Biquad(); // create a Biquad, lpFilter;
 
-int it = 0;
+int32_t t_fine;
+float t ; // C
+float p; // hPa
+float h;       // %
+float a;                         // meters
 
-// Capteur altitude
-/*struct bme280_dev dev;
- int8_t rslt = BME280_OK;*/
+
+int fd;
+int it = 0;
+bme280_raw_data raw;
+bme280_calib_data cal;
+
 
 void setup() {
 	temps_attente.tv_sec = 0;
@@ -85,12 +96,18 @@ void setup() {
 	mpu.begin(ACCEL_RANGE_8G, GYRO_RANGE_1000DPS);
 
 //Altitude
-	/*dev.dev_id = BME280_I2C_ADDR_PRIM;
-	 dev.intf = BME280_I2C_INTF;
-	 dev.read = user_i2c_read;
-	 dev.write = user_i2c_write;
-	 dev.delay_ms = user_delay_ms;
-	 rslt = bme280_init(&dev);*/
+	  fd = wiringPiI2CSetup(BME280_ADDRESS);
+	  if(fd < 0) {
+	    printf("Device not found");
+	  }
+
+
+	  readCalibrationData(fd, &cal);
+
+	  wiringPiI2CWriteReg8(fd, 0xf2, 0x01);   // humidity oversampling x 1
+	  wiringPiI2CWriteReg8(fd, 0xf4, 0x25);   // pressure and temperature oversampling x 1, mode normal
+
+
 }
 
 static void printData() {
@@ -108,11 +125,25 @@ static void printData() {
 	 printf("my  =%6.6f\n", my);
 	 printf("mz  =%6.6f\n", mz);*/
 	//printf("anglez  =%6.6f\n", anglez);
-	//printf("temps_proc  =%f\n", temps_proc);
+	printf("temps_proc  =%f\n", 1/temps_proc);
 	printf("anglex   =%6.6f    =%6.6f\n", anglex,angle_x);
 	printf("angley   =%6.6f    =%6.6f\n", angley,angle_y);
 	printf("anglez   =%6.6f    =%6.6f\n", anglez,angle_z);
 
+
+	  //readCalibrationData(fd, &cal);
+	  //wiringPiI2CWriteReg8(fd, 0xf2, 0x01);   // humidity oversampling x 1
+	   wiringPiI2CWriteReg8(fd, 0xf4, 0x25);   // pressure and temperature oversampling x 1, mode normal
+	   getRawData(fd, &raw);
+	   t_fine = getTemperatureCalibration(&cal, raw.temperature);
+	   //t = compensateTemperature(t_fine); // C
+	   p = compensatePressure(raw.pressure, &cal, t_fine) / 100; // hPa
+	   //h = compensateHumidity(raw.humidity, &cal, t_fine);       // %
+	   a = getAltitude(p);                         // meters
+
+	  printf("{\"sensor\":\"bme280\", \"humidity\":%.2f, \"pressure\":%.2f,"
+	    " \"temperature\":%.2f, \"altitude\":%.2f}\n",
+	    h, p, t, a);
 }
 void loop() {
 
@@ -143,9 +174,8 @@ void loop() {
 	/////////////////////
 	frequence = 1/temps_proc;
 
-	MadgwickAHRSupdate(gx, gy,gz,-ax, -ay, -azfrequence);
-	//MadgwickAHRSupdate(gx, gy,gz,-ay, -ax, -az,frequence); //Fonctionne sur les acceleration
-/////////////////////////////
+	MadgwickAHRSupdateIMU(gx, gy,gz,ax, ay, az,frequence);
+ /////////////////////////////
 
 // Application filtre
 	ax = LPFAcc_x.apply(ax);
@@ -168,8 +198,8 @@ void loop() {
 // Calcul du lacet avec le magnÃ©tometre
 	anglez = 0;
 
-	angle_y = atan2(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2)* 57.29578f;
-	angle_x =  asin(-2.0f * (q1*q3 - q0*q2))* 57.29578f;
+	angle_y =- atan2(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2)* 57.29578f-180;
+	angle_x = asin(-2.0f * (q1*q3 - q0*q2))* 57.29578f;
 	angle_z = atan2(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3)* 57.29578f;
 
 
@@ -237,4 +267,3 @@ int main(int argc, char **argv) {
 	return 0;
 }
 // %EndTag(FULLTEXT)%
-

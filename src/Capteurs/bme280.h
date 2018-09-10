@@ -1,240 +1,131 @@
-/**
- * Copyright (C) 2016 - 2017 Bosch Sensortec GmbH
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- *
- * Neither the name of the copyright holder nor the names of the
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
- * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER
- * OR CONTRIBUTORS BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
- * OR CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
- *
- * The information provided is believed to be accurate and reliable.
- * The copyright holder assumes no responsibility
- * for the consequences of use
- * of such information nor for any infringement of patents or
- * other rights of third parties which may result from its use.
- * No license is granted by implication or otherwise under any patent or
- * patent rights of the copyright holder.
- *
- * @file	bme280.h
- * @date	14 Feb 2018
- * @version	3.3.4
- * @brief
- *
- */
-/*! @file bme280.h
-    @brief Sensor driver for BME280 sensor */
-/*!
- * @defgroup BME280 SENSOR API
- * @{*/
-#ifndef BME280_H_
-#define BME280_H_
+/***************************************************************************
+Modified BSD License
+====================
+Copyright © 2016, Andrei Vainik
+All rights reserved.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. Neither the name of the organization nor the
+   names of its contributors may be used to endorse or promote products
+   derived from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+This piece of code was combined from several sources
+https://github.com/adafruit/Adafruit_BME280_Library
+https://cdn-shop.adafruit.com/datasheets/BST-BME280_DS001-10.pdf
+https://projects.drogon.net/raspberry-pi/wiringpi/i2c-library/
+****************************************************************************/
+#ifndef __BME280_H__
+#define __BME280_H__
 
-/*! CPP guard */
-#ifdef __cplusplus
-extern "C" {
+#define BME280_ADDRESS                0x76
+
+#define BME280_REGISTER_DIG_T1        0x88
+#define BME280_REGISTER_DIG_T2        0x8A
+#define BME280_REGISTER_DIG_T3        0x8C
+#define BME280_REGISTER_DIG_P1        0x8E
+#define BME280_REGISTER_DIG_P2        0x90
+#define BME280_REGISTER_DIG_P3        0x92
+#define BME280_REGISTER_DIG_P4        0x94
+#define BME280_REGISTER_DIG_P5        0x96
+#define BME280_REGISTER_DIG_P6        0x98
+#define BME280_REGISTER_DIG_P7        0x9A
+#define BME280_REGISTER_DIG_P8        0x9C
+#define BME280_REGISTER_DIG_P9        0x9E
+#define BME280_REGISTER_DIG_H1        0xA1
+#define BME280_REGISTER_DIG_H2        0xE1
+#define BME280_REGISTER_DIG_H3        0xE3
+#define BME280_REGISTER_DIG_H4        0xE4
+#define BME280_REGISTER_DIG_H5        0xE5
+#define BME280_REGISTER_DIG_H6        0xE7
+#define BME280_REGISTER_CHIPID        0xD0
+#define BME280_REGISTER_VERSION       0xD1
+#define BME280_REGISTER_SOFTRESET     0xE0
+#define BME280_RESET                  0xB6
+#define BME280_REGISTER_CAL26         0xE1
+#define BME280_REGISTER_CONTROLHUMID  0xF2
+#define BME280_REGISTER_CONTROL       0xF4
+#define BME280_REGISTER_CONFIG        0xF5
+#define BME280_REGISTER_PRESSUREDATA  0xF7
+#define BME280_REGISTER_TEMPDATA      0xFA
+#define BME280_REGISTER_HUMIDDATA     0xFD
+
+#define MEAN_SEA_LEVEL_PRESSURE       1013
+#include <stdio.h>
+#include <errno.h>
+#include <stdint.h>
+#include <time.h>
+#include <math.h>
+#include <wiringPiI2C.h>
+/*
+* Immutable calibration data read from bme280
+*/
+typedef struct
+{
+  uint16_t dig_T1;
+  int16_t  dig_T2;
+  int16_t  dig_T3;
+
+  uint16_t dig_P1;
+  int16_t  dig_P2;
+  int16_t  dig_P3;
+  int16_t  dig_P4;
+  int16_t  dig_P5;
+  int16_t  dig_P6;
+  int16_t  dig_P7;
+  int16_t  dig_P8;
+  int16_t  dig_P9;
+
+  uint8_t  dig_H1;
+  int16_t  dig_H2;
+  uint8_t  dig_H3;
+  int16_t  dig_H4;
+  int16_t  dig_H5;
+  int8_t   dig_H6;
+} bme280_calib_data;
+
+/*
+* Raw sensor measurement data from bme280
+*/
+typedef struct
+{
+  uint8_t pmsb;
+  uint8_t plsb;
+  uint8_t pxsb;
+
+  uint8_t tmsb;
+  uint8_t tlsb;
+  uint8_t txsb;
+
+  uint8_t hmsb;
+  uint8_t hlsb;
+
+  uint32_t temperature;
+  uint32_t pressure;
+  uint32_t humidity;
+
+} bme280_raw_data;
+
+
+void readCalibrationData(int fd, bme280_calib_data *cal);
+int32_t getTemperatureCalibration(bme280_calib_data *cal, int32_t adc_T);
+float compensateTemperature(int32_t t_fine);
+float compensatePressure(int32_t adc_P, bme280_calib_data *cal, int32_t t_fine);
+float compensateHumidity(int32_t adc_H, bme280_calib_data *cal, int32_t t_fine);
+void getRawData(int fd, bme280_raw_data *raw);
+float getAltitude(float pressure);
+
 #endif
-
-/* Header includes */
-#include "bme280_defs.h"
-
-/*!
- *  @brief This API is the entry point.
- *  It reads the chip-id and calibration data from the sensor.
- *
- *  @param[in,out] dev : Structure instance of bme280_dev
- *
- *  @return Result of API execution status
- *  @retval zero -> Success / +ve value -> Warning / -ve value -> Error
- */
-int8_t bme280_init(struct bme280_dev *dev);
-
-/*!
- * @brief This API writes the given data to the register address
- * of the sensor.
- *
- * @param[in] reg_addr : Register address from where the data to be written.
- * @param[in] reg_data : Pointer to data buffer which is to be written
- * in the sensor.
- * @param[in] len : No of bytes of data to write..
- * @param[in] dev : Structure instance of bme280_dev.
- *
- * @return Result of API execution status
- * @retval zero -> Success / +ve value -> Warning / -ve value -> Error
- */
-int8_t bme280_set_regs(uint8_t *reg_addr, const uint8_t *reg_data, uint8_t len, const struct bme280_dev *dev);
-
-/*!
- * @brief This API reads the data from the given register address of the sensor.
- *
- * @param[in] reg_addr : Register address from where the data to be read
- * @param[out] reg_data : Pointer to data buffer to store the read data.
- * @param[in] len : No of bytes of data to be read.
- * @param[in] dev : Structure instance of bme280_dev.
- *
- * @return Result of API execution status
- * @retval zero -> Success / +ve value -> Warning / -ve value -> Error
- */
-int8_t bme280_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, const struct bme280_dev *dev);
-
-/*!
- * @brief This API sets the oversampling, filter and standby duration
- * (normal mode) settings in the sensor.
- *
- * @param[in] dev : Structure instance of bme280_dev.
- * @param[in] desired_settings : Variable used to select the settings which
- * are to be set in the sensor.
- *
- * @note : Below are the macros to be used by the user for selecting the
- * desired settings. User can do OR operation of these macros for configuring
- * multiple settings.
- *
- * Macros		  |   Functionality
- * -----------------------|----------------------------------------------
- * BME280_OSR_PRESS_SEL    |   To set pressure oversampling.
- * BME280_OSR_TEMP_SEL     |   To set temperature oversampling.
- * BME280_OSR_HUM_SEL    |   To set humidity oversampling.
- * BME280_FILTER_SEL     |   To set filter setting.
- * BME280_STANDBY_SEL  |   To set standby duration setting.
- *
- * @return Result of API execution status
- * @retval zero -> Success / +ve value -> Warning / -ve value -> Error.
- */
-int8_t bme280_set_sensor_settings(uint8_t desired_settings, const struct bme280_dev *dev);
-
-/*!
- * @brief This API gets the oversampling, filter and standby duration
- * (normal mode) settings from the sensor.
- *
- * @param[in,out] dev : Structure instance of bme280_dev.
- *
- * @return Result of API execution status
- * @retval zero -> Success / +ve value -> Warning / -ve value -> Error.
- */
-int8_t bme280_get_sensor_settings(struct bme280_dev *dev);
-
-/*!
- * @brief This API sets the power mode of the sensor.
- *
- * @param[in] dev : Structure instance of bme280_dev.
- * @param[in] sensor_mode : Variable which contains the power mode to be set.
- *
- *    sensor_mode           |   Macros
- * ---------------------|-------------------
- *     0                | BME280_SLEEP_MODE
- *     1                | BME280_FORCED_MODE
- *     3                | BME280_NORMAL_MODE
- *
- * @return Result of API execution status
- * @retval zero -> Success / +ve value -> Warning / -ve value -> Error
- */
-int8_t bme280_set_sensor_mode(uint8_t sensor_mode,
-				const struct bme280_dev *dev);
-
-/*!
- * @brief This API gets the power mode of the sensor.
- *
- * @param[in] dev : Structure instance of bme280_dev.
- * @param[out] sensor_mode : Pointer variable to store the power mode.
- *
- *   sensor_mode            |   Macros
- * ---------------------|-------------------
- *     0                | BME280_SLEEP_MODE
- *     1                | BME280_FORCED_MODE
- *     3                | BME280_NORMAL_MODE
- *
- * @return Result of API execution status
- * @retval zero -> Success / +ve value -> Warning / -ve value -> Error
- */
-int8_t bme280_get_sensor_mode(uint8_t *sensor_mode, const struct bme280_dev *dev);
-
-/*!
- * @brief This API performs the soft reset of the sensor.
- *
- * @param[in] dev : Structure instance of bme280_dev.
- *
- * @return Result of API execution status
- * @retval zero -> Success / +ve value -> Warning / -ve value -> Error.
- */
-int8_t bme280_soft_reset(const struct bme280_dev *dev);
-
-/*!
- * @brief This API reads the pressure, temperature and humidity data from the
- * sensor, compensates the data and store it in the bme280_data structure
- * instance passed by the user.
- *
- * @param[in] sensor_comp : Variable which selects which data to be read from
- * the sensor.
- *
- * sensor_comp |   Macros
- * ------------|-------------------
- *     1       | BME280_PRESS
- *     2       | BME280_TEMP
- *     4       | BME280_HUM
- *     7       | BME280_ALL
- *
- * @param[out] comp_data : Structure instance of bme280_data.
- * @param[in] dev : Structure instance of bme280_dev.
- *
- * @return Result of API execution status
- * @retval zero -> Success / +ve value -> Warning / -ve value -> Error
- */
-int8_t bme280_get_sensor_data(uint8_t sensor_comp, struct bme280_data *comp_data, struct bme280_dev *dev);
-
-/*!
- *  @brief This API is used to parse the pressure, temperature and
- *  humidity data and store it in the bme280_uncomp_data structure instance.
- *
- *  @param[in] reg_data     : Contains register data which needs to be parsed
- *  @param[out] uncomp_data : Contains the uncompensated pressure, temperature
- *  and humidity data.
- */
-void bme280_parse_sensor_data(const uint8_t *reg_data, struct bme280_uncomp_data *uncomp_data);
-
-/*!
- * @brief This API is used to compensate the pressure and/or
- * temperature and/or humidity data according to the component selected by the
- * user.
- *
- * @param[in] sensor_comp : Used to select pressure and/or temperature and/or
- * humidity.
- * @param[in] uncomp_data : Contains the uncompensated pressure, temperature and
- * humidity data.
- * @param[out] comp_data : Contains the compensated pressure and/or temperature
- * and/or humidity data.
- * @param[in] calib_data : Pointer to the calibration data structure.
- *
- * @return Result of API execution status.
- * @retval zero -> Success / -ve value -> Error
- */
-int8_t bme280_compensate_data(uint8_t sensor_comp, const struct bme280_uncomp_data *uncomp_data,
-				     struct bme280_data *comp_data, struct bme280_calib_data *calib_data);
-
-#ifdef __cplusplus
-}
-#endif /* End of CPP guard */
-#endif /* BME280_H_ */
-/** @}*/
