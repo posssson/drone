@@ -22,9 +22,10 @@ using namespace std;
 #include "MadgwickAHRS.c"
 
 #include <errno.h>
-#include <wiringPiI2C.h>
+//#include <wiringPiI2C.h>
 
-
+#define PIN_ECHO 16
+#define PIN_PULSE 20
 
 // class default I2C address is 0x68
 // specific I2C addresses may be passed as a parameter here
@@ -40,6 +41,10 @@ math::LowPassFilter2p LPFGyro_y(1000, 50);
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz;
+float distance_ultrason;
+
+struct timespec start_echo, stop_echo, diff_echo;
+double echo_time;
 int i = 1;
 float gyroScale = 131;
 float arx, ary, arz, grx, gry, grz, gsx, gsy, gsz;
@@ -54,29 +59,35 @@ float vitx = 0, vity = 0;
 float angle_accel_x = 0, angle_accel_y = 0;
 struct timespec time_actuel, ancien_temps, temps_attente,
 		temps_attente_nanosleep;
-float R12=0;
+float temps_recup_altitude = 0;
+float R12 = 0;
 float R22 = 0;
-float R23=0;
-float R31=0;
-float R32 =0;
+float R23 = 0;
+float R31 = 0;
+float R32 = 0;
 float R33 = 0;
-float frequence =0;
+float frequence = 0;
+float altitude_baro = 0;
 Biquad *lpFilterX = new Biquad(); // create a Biquad, lpFilter;
 Biquad *lpFilterY = new Biquad(); // create a Biquad, lpFilter;
 Biquad *lpFilterZ = new Biquad(); // create a Biquad, lpFilter;
 
+float sec_to_nano = 1000000000;
 int32_t t_fine;
-float t ; // C
+float t; // C
 float p; // hPa
 float h;       // %
 float a;                         // meters
-
+int ultrason_validity = 0;
 
 int fd;
 int it = 0;
 bme280_raw_data raw;
 bme280_calib_data cal;
 
+float get_altitude();
+void get_altitude_ultrason(void);
+void setup();
 
 void setup() {
 	temps_attente.tv_sec = 0;
@@ -96,18 +107,20 @@ void setup() {
 	mpu.begin(ACCEL_RANGE_8G, GYRO_RANGE_1000DPS);
 
 //Altitude
-	  fd = wiringPiI2CSetup(BME280_ADDRESS);
-	  if(fd < 0) {
-	    printf("Device not found");
-	  }
+	fd = wiringPiI2CSetup(BME280_ADDRESS);
+	if (fd < 0) {
+		printf("Device not found");
+	}
+	// capeur pression
+	readCalibrationData(fd, &cal);
+	wiringPiI2CWriteReg8(fd, 0xf2, 0x01);   // humidity oversampling x 1
+	wiringPiI2CWriteReg8(fd, 0xf4, 0x25); // pressure and temperature oversampling x 1, mode normal-*/
 
-
-	  readCalibrationData(fd, &cal);
-
-	  wiringPiI2CWriteReg8(fd, 0xf2, 0x01);   // humidity oversampling x 1
-	  wiringPiI2CWriteReg8(fd, 0xf4, 0x25);   // pressure and temperature oversampling x 1, mode normal
-
-
+	// Capteur ultrason
+	wiringPiSetupGpio();
+	pinMode(PIN_PULSE, OUTPUT);
+	pinMode(PIN_ECHO, INPUT);
+	wiringPiISR(PIN_ECHO, INT_EDGE_RISING, get_altitude_ultrason); /// Mettre des commentaires
 }
 
 static void printData() {
@@ -125,28 +138,17 @@ static void printData() {
 	 printf("my  =%6.6f\n", my);
 	 printf("mz  =%6.6f\n", mz);*/
 	//printf("anglez  =%6.6f\n", anglez);
-	printf("temps_proc  =%f\n", 1/temps_proc);
-	printf("anglex   =%6.6f    =%6.6f\n", anglex,angle_x);
-	printf("angley   =%6.6f    =%6.6f\n", angley,angle_y);
-	printf("anglez   =%6.6f    =%6.6f\n", anglez,angle_z);
+	printf("frequence en Hz  =%f\n", frequence);
+	printf("anglex   =%6.6f    =%6.6f\n", anglex, angle_x);
+	printf("angley   =%6.6f    =%6.6f\n", angley, angle_y);
+	printf("anglez   =%6.6f    =%6.6f\n", anglez, angle_z);
+	printf("distance_ultrason   =%6.6f \n", distance_ultrason);
 
-
-	  //readCalibrationData(fd, &cal);
-	  //wiringPiI2CWriteReg8(fd, 0xf2, 0x01);   // humidity oversampling x 1
-	   wiringPiI2CWriteReg8(fd, 0xf4, 0x25);   // pressure and temperature oversampling x 1, mode normal
-	   getRawData(fd, &raw);
-	   t_fine = getTemperatureCalibration(&cal, raw.temperature);
-	   //t = compensateTemperature(t_fine); // C
-	   p = compensatePressure(raw.pressure, &cal, t_fine) / 100; // hPa
-	   //h = compensateHumidity(raw.humidity, &cal, t_fine);       // %
-	   a = getAltitude(p);                         // meters
-
-	  printf("{\"sensor\":\"bme280\", \"humidity\":%.2f, \"pressure\":%.2f,"
-	    " \"temperature\":%.2f, \"altitude\":%.2f}\n",
-	    h, p, t, a);
+	/*  printf("{\"sensor\":\"bme280\", \"humidity\":%.2f, \"pressure\":%.2f,"
+	 " \"temperature\":%.2f, \"altitude\":%.2f}\n",
+	 h, p, t, a);*/
 }
 void loop() {
-
 	clock_gettime(CLOCK_REALTIME, &time_actuel);
 	temps_proc = (time_actuel.tv_sec - ancien_temps.tv_sec)
 			+ (time_actuel.tv_nsec - ancien_temps.tv_nsec) / 1000000000.0;
@@ -159,9 +161,7 @@ void loop() {
 	 printf("temps_proc        %f\n", temps_proc);
 	 }*/
 	ancien_temps = time_actuel;
-
 	mpu.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
-
 // calibration
 // TODO mettre dans .h
 	gx -= 1.80;
@@ -172,10 +172,10 @@ void loop() {
 	az = az * 0.986718 - 0.897756;
 
 	/////////////////////
-	frequence = 1/temps_proc;
+	frequence = 1 / temps_proc;
 
-	MadgwickAHRSupdateIMU(gx, gy,gz,ax, ay, az,frequence);
- /////////////////////////////
+	MadgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az, frequence);
+	/////////////////////////////
 
 // Application filtre
 	ax = LPFAcc_x.apply(ax);
@@ -193,15 +193,15 @@ void loop() {
 	anglex = 0.98 * (anglex - (float) (gy) * temps_proc) + 0.02 * angle_accel_x;
 	angley = 0.98 * (angley - (float) (gx) * temps_proc) + 0.02 * angle_accel_y;
 
-
 	///////////////////////////
 // Calcul du lacet avec le magnÃ©tometre
 	anglez = 0;
 
-	angle_y =- atan2(q0*q1 + q2*q3, 0.5f - q1*q1 - q2*q2)* 57.29578f-180;
-	angle_x = asin(-2.0f * (q1*q3 - q0*q2))* 57.29578f;
-	angle_z = atan2(q1*q2 + q0*q3, 0.5f - q2*q2 - q3*q3)* 57.29578f;
 
+	angle_x = asin(-2.0f * (q1 * q3 - q0 * q2)) * 57.29578f;
+	angle_y = -atan2(q0 * q1 + q2 * q3, 0.5f - q1 * q1 - q2 * q2) * 57.29578f
+			+ 180;
+	angle_z = atan2(q1 * q2 + q0 * q3, 0.5f - q2 * q2 - q3 * q3) * 57.29578f;
 
 	if (temps_proc != 0) {
 		vitx = (anglex - anglex_prec) / temps_proc;
@@ -215,20 +215,73 @@ void loop() {
 		anglex = 0;
 		angley = 0;
 	}
+
+	if (temps_recup_altitude < 0.1) {
+		temps_recup_altitude += temps_proc;
+	} else {
+		temps_recup_altitude = 0;
+		altitude_baro = get_altitude();
+		digitalWrite(PIN_PULSE, HIGH);
+		sleep(0.00001);
+		digitalWrite(PIN_PULSE, LOW);
+		clock_gettime(CLOCK_REALTIME, &start_echo);
+
+		printData();
+	}
+
 }
 
 void recuperation_initialisation(const std_msgs::String::ConstPtr& msg,
-		int *recu_init) // vÃ©rification initialisation
+		int *recu_init) // verification initialisation
 		{
 	*recu_init = 1;
-	ROS_INFO("Init recu");
+	ROS_INFO("Init recu par Capteurs");
+}
+
+float get_altitude() {
+	// Recupération altitude
+	wiringPiI2CWriteReg8(fd, 0xf4, 0x25); // pressure and temperature oversampling x 1, mode normal
+	getRawData(fd, &raw);
+	t_fine = getTemperatureCalibration(&cal, raw.temperature);
+	p = compensatePressure(raw.pressure, &cal, t_fine) / 100; // hPa
+	a = getAltitude(p);                         // meters
+	return a;
+
+}
+
+void get_altitude_ultrason(void) {
+	ultrason_validity = 1;
+	clock_gettime(CLOCK_REALTIME, &start_echo);
+	while (digitalRead(PIN_ECHO) && ultrason_validity)
+	{
+		clock_gettime(CLOCK_REALTIME, &stop_echo);
+		if ((stop_echo.tv_nsec - start_echo.tv_nsec) < 0 /* ns */) {
+			diff_echo.tv_sec = stop_echo.tv_sec - start_echo.tv_sec - 1;
+			diff_echo.tv_nsec = sec_to_nano /* ns */+ stop_echo.tv_nsec
+					- start_echo.tv_nsec;
+		} else {
+			diff_echo.tv_sec = stop_echo.tv_sec - start_echo.tv_sec;
+			diff_echo.tv_nsec = stop_echo.tv_nsec - start_echo.tv_nsec;
+		}
+		echo_time = (float) ((diff_echo.tv_sec * sec_to_nano)
+				+ (float) (diff_echo.tv_nsec)); //nsec
+		echo_time /= (float) sec_to_nano; //sec
+		if (echo_time>0.05)
+		{
+			ultrason_validity = 0;
+		}
+	} // On boucle tant que c'est un
+
+	if (ultrason_validity) {
+		//calcul de la distance en cm
+		distance_ultrason = (float) (echo_time * 17000); //cm
+		//ROS_INFO("distance_ultrason =  %f",distance_ultrason);
+	}
 }
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "capteur");
 	ros::NodeHandle n;
-
-	setup();
 
 	int recu_init = 0;
 
@@ -239,11 +292,11 @@ int main(int argc, char **argv) {
 			boost::bind(recuperation_initialisation, _1, &recu_init);
 	ros::Subscriber sub = n.subscribe("initialisation", 1, temp);
 	drone::Capteurs_msg msg_attitude;
-	ROS_INFO("Capteurs");
-
 	ros::Publisher _pub_msg_attitude = n.advertise < drone::Capteurs_msg
 			> ("capteurs", 1);
 
+	sleep(1);
+	setup();
 	while (ros::ok()) {
 		loop();
 		if (recu_init == 1) {
@@ -256,8 +309,8 @@ int main(int argc, char **argv) {
 			msg_attitude.z = anglez; // lacet calculer avec le magnÃ©tometre
 			msg_attitude.vx = -gy;
 			msg_attitude.vy = -gx;
-			printData();
 			_pub_msg_attitude.publish(msg_attitude);
+		} else {
 		}
 		ros::spinOnce();
 	}

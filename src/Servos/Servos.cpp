@@ -258,6 +258,10 @@ struct timeval  tv;
 
 
 		}
+		else
+		{
+			usleep(100);
+		}
 
 		ros::spinOnce();
 
