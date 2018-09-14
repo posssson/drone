@@ -215,7 +215,7 @@ struct timeval  tv;
 			if (arret == 1 && gaz >1100 && initialisation_lacet==1)
 			{
 				optim = 0; // todo changer pour lancer optim
-				gpioPWM(moteur_devant_droit, commande_devant_droit);  // OK 
+				gpioPWM(moteur_devant_droit, commande_devant_droit);  // OK
 				gpioPWM(moteur_devant_gauche, commande_devant_gauche);  // Moyenement OK
 				gpioPWM(moteur_deriere_droit, commande_derierre_droit);   // OK
 				gpioPWM(moteur_deriere_gauche, commande_derierre_gauche);

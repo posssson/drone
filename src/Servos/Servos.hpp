@@ -42,9 +42,9 @@ double somme_erreurs_total = 0;
 
 // initialisation moteur
 int moteur_devant_gauche = 27;
-int moteur_deriere_gauche = 17;
+int moteur_deriere_gauche = 6;
 int moteur_deriere_droit = 5;
-int moteur_devant_droit = 6;
+int moteur_devant_droit = 17;
 	
 // Itération des optimisations
 int it =0,it_optim=0;
@@ -147,10 +147,10 @@ void calcul_valeur_commande_moteur()
 			commande_derierre_gauche += commande[lacet];
 
 			// Saturation de la commande
-			commande_devant_droit = saturation(commande_devant_droit ,1150,1900);
-			commande_devant_gauche = saturation(commande_devant_gauche,1150,1900);
-			commande_derierre_droit = saturation(commande_derierre_droit,1150,1900);
-			commande_derierre_gauche = saturation(commande_derierre_gauche,1150,1900); 
+			commande_devant_droit = saturation(commande_devant_droit ,1100,1900);
+			commande_devant_gauche = saturation(commande_devant_gauche,1100,1900);
+			commande_derierre_droit = saturation(commande_derierre_droit,1100,1900);
+			commande_derierre_gauche = saturation(commande_derierre_gauche,1100,1900);
 
 }
 

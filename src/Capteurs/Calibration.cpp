@@ -34,14 +34,8 @@ void setup() {
 	// verify connection
 	printf("Testing device connections...\n");
 	//printf("%d   \n",mpu.begin(ACCEL_RANGE_4G,GYRO_RANGE_250DPS));// ? "MPU9250 connection successful\n" : "MPU9250 connection failed\n");
-while((mpu.begin(ACCEL_RANGE_8G,GYRO_RANGE_1000DPS))!= 0)
-{
-	// reset the MPU9250
-	printf("reset the MPU9250...\n");
+mpu.begin(ACCEL_RANGE_8G,GYRO_RANGE_1000DPS);
 
-    // wait for oscillators to stabilize
-    delay(100);
-}
 }
 
 void loop() {

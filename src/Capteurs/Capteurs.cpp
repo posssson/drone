@@ -104,7 +104,7 @@ void setup() {
 // verify connection
 	printf("Testing device connections...\n");
 	int reset = 0;
-	mpu.begin(ACCEL_RANGE_8G, GYRO_RANGE_1000DPS);
+	mpu.begin(ACCEL_RANGE_8G, GYRO_RANGE_1000DPS); // mettre message erreur si raté
 
 //Altitude
 	fd = wiringPiI2CSetup(BME280_ADDRESS);
@@ -166,10 +166,10 @@ void loop() {
 // TODO mettre dans .h
 	gx -= 1.80;
 	gy += 1.55;
-	gz -= 0.78;
-	ax = ax * 0.997505 - 0.73333;
-	ay = ay * 0.998909 - 1.07523;
-	az = az * 0.986718 - 0.897756;
+	gz -= 2.5;
+	ax = ax * 0.998149 - 0.6887797;
+	ay = ay * 0.99829 - 1.4973;
+	az = az * 0.985832 - 1.33133;
 
 	/////////////////////
 	frequence = 1 / temps_proc;
@@ -199,7 +199,7 @@ void loop() {
 
 
 	angle_x = asin(-2.0f * (q1 * q3 - q0 * q2)) * 57.29578f;
-	angle_y = -atan2(q0 * q1 + q2 * q3, 0.5f - q1 * q1 - q2 * q2) * 57.29578f
+	angle_y = -atan2(2*(q0 * q1 + q2 * q3), 1.0f - 2*(q1 * q1 + q2 * q2)) * 57.29578f
 			+ 180;
 	angle_z = atan2(q1 * q2 + q0 * q3, 0.5f - q2 * q2 - q3 * q3) * 57.29578f;
 
