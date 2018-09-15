@@ -90,7 +90,7 @@ void recuperation_initialisation(const std_msgs::String::ConstPtr& msg,
 		int *recu_init) // verification initialisation
 		{
 	*recu_init = 1;
-	ROS_INFO("Init recu par Capteurs");
+	ROS_INFO("Init recu par Altitude");
 }
 
 float get_altitude() {
@@ -99,7 +99,7 @@ float get_altitude() {
 	getRawData(fd, &raw);
 	t_fine = getTemperatureCalibration(&cal, raw.temperature);
 	p = compensatePressure(raw.pressure, &cal, t_fine) / 100; // hPa
-	altitude = getAltitude(p);                         // meters
+	altitude = getAltitude(p);                        // meters
 	return altitude;
 
 }
@@ -146,24 +146,19 @@ int main(int argc, char **argv) {
 	boost::function<void(const std_msgs::String::ConstPtr& msg)> temp =
 			boost::bind(recuperation_initialisation, _1, &recu_init);
 	ros::Subscriber sub = n.subscribe("initialisation", 1, temp);
-	//drone::Capteurs_msg msg_attitude;
-	//ros::Publisher _pub_msg_attitude = n.advertise < drone::Capteurs_msg
-	//		> ("capteurs", 1);
+	drone::Altitude_msg msg_altitude;
+	ros::Publisher _pub_msg_altitude = n.advertise < drone::Altitude_msg
+			> ("altitude", 1);
 
 	sleep(1);
 	setup();
 	while (ros::ok()) {
-		sleep(0.4);
+		usleep(200000); // 0.2 secs
 		loop();
 		if (recu_init == 1) {
-
-
-		/*	msg_attitude.x = anglex; // tangage
-			msg_attitude.y = angley; // roulis
-			msg_attitude.z = anglez; // lacet calculer avec le magnétometre
-			msg_attitude.vx = -gy;
-			msg_attitude.vy = -gx;
-			_pub_msg_attitude.publish(msg_attitude);*/
+			msg_altitude.altitude_baro = altitude;
+			msg_altitude.altitude_ultrason = distance_ultrason;
+			_pub_msg_altitude.publish(msg_altitude);
 		} else {
 		}
 		ros::spinOnce();

@@ -1,56 +1,6 @@
 #include "Capteurs.hpp"
 using namespace std;
 
-// class default I2C address is 0x68
-// specific I2C addresses may be passed as a parameter here
-// AD0 low = 0x68 (default for InvenSense evaluation board)
-// AD0 high = 0x69
-
-MPU9250 mpu(0x68);
-math::LowPassFilter2p LPFAcc_x(1000, 50);
-math::LowPassFilter2p LPFAcc_y(1000, 50);
-math::LowPassFilter2p LPFAcc_z(1000, 50);
-math::LowPassFilter2p LPFGyro_x(1000, 50);
-math::LowPassFilter2p LPFGyro_y(1000, 50);
-float ax, ay, az;
-float gx, gy, gz;
-float mx, my, mz;
-
-
-int i = 1;
-float gyroScale = 131;
-float arx, ary, arz, grx, gry, grz, gsx, gsy, gsz;
-float timePrev = 0, timet = 0, timeStep = 0;
-float ypr[3];
-struct timeval tv;
-float anglex = 0, angley = 0, anglez = 0;
-float angle_x = 0, angle_y = 0, angle_z = 0;
-float temps_proc = 0;
-float anglex_prec = 0, angley_prec = 0, anglez_prec = 0;
-float vitx = 0, vity = 0;
-float angle_accel_x = 0, angle_accel_y = 0;
-struct timespec time_actuel, ancien_temps, temps_attente,
-		temps_attente_nanosleep;
-float temps_recup_altitude = 0;
-float R12 = 0;
-float R22 = 0;
-float R23 = 0;
-float R31 = 0;
-float R32 = 0;
-float R33 = 0;
-float frequence = 0;
-Biquad *lpFilterX = new Biquad(); // create a Biquad, lpFilter;
-Biquad *lpFilterY = new Biquad(); // create a Biquad, lpFilter;
-Biquad *lpFilterZ = new Biquad(); // create a Biquad, lpFilter;
-
-float sec_to_nano = 1000000000;
-
-
-int fd;
-int it = 0;
-
-void setup();
-
 void setup() {
 	temps_attente.tv_sec = 0;
 	temps_attente.tv_nsec = 10;
@@ -95,13 +45,12 @@ void loop() {
 	temps_proc = (time_actuel.tv_sec - ancien_temps.tv_sec)
 			+ (time_actuel.tv_nsec - ancien_temps.tv_nsec) / 1000000000.0;
 
-	/*while (temps_proc < 0.001)
+	 while (temps_proc < 0.001)
 	 {
 	 clock_gettime( CLOCK_REALTIME, &time_actuel);
 	 temps_proc =(time_actuel.tv_sec - ancien_temps.tv_sec) + (time_actuel.tv_nsec - ancien_temps.tv_nsec)/1000000000.0;
 	 nanosleep(&temps_attente,&temps_attente_nanosleep);
-	 printf("temps_proc        %f\n", temps_proc);
-	 }*/
+	 }
 	ancien_temps = time_actuel;
 	frequence = 1 / temps_proc;
 	mpu.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);

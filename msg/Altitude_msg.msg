@@ -1,0 +1,2 @@
+float32 altitude_baro
+float32 altitude_ultrason

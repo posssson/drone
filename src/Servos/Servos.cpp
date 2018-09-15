@@ -103,7 +103,6 @@ struct timeval  tv;
 			nanosleep(&temps_attente,&temps_attente_nanosleep);
 		}
 		ancien_temps = time_actuel;
-		
 		// ajustement PID en fonction du temps
 		for (int i=0;i<3;i++) {		
 			Ki[i] = Ki_default[i]*(float)temps_proc;

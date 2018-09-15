@@ -6,7 +6,7 @@
 #include <math.h>
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-//#include "drone/Capteurs_msg.h"
+#include "drone/Altitude_msg.h"
 #include <signal.h>
 #include <unistd.h>
 #include <time.h>

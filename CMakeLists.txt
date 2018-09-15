@@ -19,6 +19,7 @@ Consigne_msg.msg
 Clavier_msg.msg
 Optim_msg.msg
 Erreur_angle_msg.msg
+Altitude_msg.msg
 )
 #add_service_files(FILES AddTwoInts.srv)
 
