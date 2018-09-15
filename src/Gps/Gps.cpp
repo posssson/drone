@@ -51,7 +51,7 @@ void gps()
 	std::string token;
 	while ((pos = gps_message.find(delimiter)) != std::string::npos) {
 	    token = gps_message.substr(0, pos);
-	    std::cout << token << std::endl;
+	    //std::cout << token << std::endl;
 	    gps_message.erase(0, pos + delimiter.length());
 	}
 
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 
 		sleep(0.2);
 		gps();
-		ROS_INFO("fin gps");
+		//ROS_INFO("fin gps");
 		ros::spinOnce();
 
 

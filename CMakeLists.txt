@@ -47,13 +47,17 @@ add_executable(Init src/Init/Init.cpp)
 target_link_libraries(Init ${catkin_LIBRARIES})
 add_dependencies(Init drone_generate_messages_cpp)
 
-add_executable(Capteurs src/Capteurs/Capteurs.cpp src/Capteurs/I2Cdev.cpp src/Capteurs/MPU6050.cpp src/Common/Biquad.cpp src/Common/LowPassFilter2p.cpp src/Capteurs/MPU9250.cpp src/Capteurs/bme280.c)
+add_executable(Capteurs src/Capteurs/Capteurs.cpp src/Capteurs/I2Cdev.cpp src/Common/Biquad.cpp src/Common/LowPassFilter2p.cpp src/Capteurs/MPU9250.cpp)
 target_link_libraries(Capteurs ${catkin_LIBRARIES})
 add_dependencies(Capteurs drone_generate_messages_cpp)
 
 add_executable(Optim src/Optim/Optimisation.cpp)
 target_link_libraries(Optim ${catkin_LIBRARIES})
 add_dependencies(Optim drone_generate_messages_cpp)
+
+add_executable(Altitude src/Altitude/Altitude.cpp src/Altitude/bme280.c src/Altitude/I2Cdev.cpp )
+target_link_libraries(Altitude ${catkin_LIBRARIES})
+add_dependencies(Altitude drone_generate_messages_cpp)
 
 add_executable(Gps src/Gps/Gps.cpp)
 target_link_libraries(Gps ${catkin_LIBRARIES})
@@ -63,7 +67,7 @@ target_link_libraries (Servos wiringPi pigpio)
 target_link_libraries (Capteurs wiringPi)
 target_link_libraries (Optim nlopt)
 target_link_libraries (Gps wiringPi)
-
+target_link_libraries (Altitude wiringPi)
 
 
 
