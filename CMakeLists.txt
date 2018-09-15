@@ -55,13 +55,14 @@ add_executable(Optim src/Optim/Optimisation.cpp)
 target_link_libraries(Optim ${catkin_LIBRARIES})
 add_dependencies(Optim drone_generate_messages_cpp)
 
-add_executable(Gps src/Gps/Gps.cpp src/Gps/serial.cpp)
+add_executable(Gps src/Gps/Gps.cpp)
 target_link_libraries(Gps ${catkin_LIBRARIES})
 add_dependencies(Gps drone_generate_messages_cpp)
 
 target_link_libraries (Servos wiringPi pigpio)
 target_link_libraries (Capteurs wiringPi)
 target_link_libraries (Optim nlopt)
+target_link_libraries (Gps wiringPi)
 
 
 
