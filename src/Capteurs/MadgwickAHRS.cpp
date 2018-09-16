@@ -237,14 +237,13 @@ void Madgwick::updateIMU(float gx, float gy, float gz, float ax, float ay, float
 // See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
 
 float Madgwick::invSqrt(float x) {
-	float halfx = 0.5f * x;
-	float y = x;
-	long i = *(long*)&y;
-	i = 0x5f3759df - (i>>1);
-	y = *(float*)&i;
-	y = y * (1.5f - (halfx * y * y));
-	y = y * (1.5f - (halfx * y * y));
-	return y;
+    float halfx = 0.5f * x;
+    float y = x;
+    long i = *(long*)&y;
+    i = 0x5f3759df - (i>>1);
+    y = *(float*)&i;
+    y = y * (1.5f - (halfx * y * y));
+    return y;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -252,7 +251,7 @@ float Madgwick::invSqrt(float x) {
 void Madgwick::computeAngles()
 {
 	roll = asinf(-2.0f * (q1 * q3 - q0 * q2));
-	pitch = atan2f(2*(q0 * q1 + q2 * q3),abs(1.0f - 2*(q1 * q1 + q2 * q2)));
+	pitch = atan2f(2*(q0 * q1 + q2 * q3),fabs(1.0f - 2*(q1 * q1 + q2 * q2)));
 	yaw = atan2f(2*(q0 * q3 + q1 * q2), 1-2*(q2 * q2 + q3 * q3));
 	anglesComputed = 1;
 }

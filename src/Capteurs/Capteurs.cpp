@@ -109,7 +109,7 @@ void loop() {
 
 
 	angle_x = asin(-2.0f * (q1 * q3 - q0 * q2)) * 57.29578f;
-	angle_y = atan2(2*(q0 * q1 + q2 * q3),abs(1.0f - 2*(q1 * q1 + q2 * q2))) * 57.295787;
+	angle_y = atan2(2*(q0 * q1 + q2 * q3),fabs(1.0f - 2*(q1 * q1 + q2 * q2))) * 57.295787;
 	angle_z = atan2(2*(q0 * q3 + q1 * q2), 1-2*(q2 * q2 + q3 * q3)) * 57.29578f;
 
 	if (temps_proc != 0) {

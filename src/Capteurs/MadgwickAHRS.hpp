@@ -17,7 +17,11 @@
 #ifndef MadgwickAHRS_hpp
 #define MadgwickAHRS_hpp
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <string.h>
 
 //--------------------------------------------------------------------------------------------
 // Variable declaration
