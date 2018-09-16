@@ -121,8 +121,8 @@ struct timeval  tv;
 			consigne[tangage] =-((float)temps_haut_tangage - 1500.0)/10;
 			
 			// Mise à zéro si test sans manette
-			//consigne[tangage] = 0;
-			//consigne[roulis] = 0;
+			consigne[tangage] = 0;
+			consigne[roulis] = 0;
 
 			// RAZ permet de mettre le Ki ou pas.
 			if (gaz < 1100)
@@ -205,9 +205,9 @@ struct timeval  tv;
 			if ((abs( attitude[tangage]) > 25 || abs( attitude[roulis])>25) && arret == 1)
 				{
 					// SECURITE DE TEST
-					ROS_INFO("MISE EN SECURITE");
+					/*ROS_INFO("MISE EN SECURITE");
 					ROS_INFO("attitude[tangage] = %f",attitude[tangage]);
-					ROS_INFO("attitude[roulis] = %f",attitude[roulis]);
+					ROS_INFO("attitude[roulis] = %f",attitude[roulis]);*/
 					arret = 0;
 
 				}

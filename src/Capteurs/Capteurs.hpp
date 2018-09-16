@@ -18,6 +18,7 @@
 #include "../Common/LowPassFilter2p.hpp"
 #include "../Common/Biquad.h"
 #include "MadgwickAHRS.c"
+#include "MadgwickAHRS.hpp"
 #include <errno.h>
 
 
@@ -36,7 +37,8 @@ float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz;
 
-
+float roll,pitch ,heading;
+Madgwick filter;
 int i = 1;
 float gyroScale = 131;
 float arx, ary, arz, grx, gry, grz, gsx, gsy, gsz;

@@ -61,9 +61,9 @@ void setup() {
 static void printData() {
 
 	// print the data
-	printf("distance_ultrason   =%6.6f \n", distance_ultrason);
+/*	printf("distance_ultrason   =%6.6f \n", distance_ultrason);
 	printf("altitude  =%6.6f \n",altitude);
-	printf("frequence altitude = %6.6f \n", frequence);
+	printf("frequence altitude = %6.6f \n", frequence);*/
 }
 
 void loop() {
@@ -95,6 +95,7 @@ void recuperation_initialisation(const std_msgs::String::ConstPtr& msg,
 
 float get_altitude() {
 	// Recupération altitude
+	readCalibrationData(fd, &cal);
 	wiringPiI2CWriteReg8(fd, 0xf4, 0x25); // pressure and temperature oversampling x 1, mode normal
 	getRawData(fd, &raw);
 	t_fine = getTemperatureCalibration(&cal, raw.temperature);

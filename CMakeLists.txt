@@ -48,7 +48,7 @@ add_executable(Init src/Init/Init.cpp)
 target_link_libraries(Init ${catkin_LIBRARIES})
 add_dependencies(Init drone_generate_messages_cpp)
 
-add_executable(Capteurs src/Capteurs/Capteurs.cpp src/Capteurs/I2Cdev.cpp src/Common/Biquad.cpp src/Common/LowPassFilter2p.cpp src/Capteurs/MPU9250.cpp)
+add_executable(Capteurs src/Capteurs/Capteurs.cpp src/Capteurs/I2Cdev.cpp src/Common/Biquad.cpp src/Common/LowPassFilter2p.cpp src/Capteurs/MPU9250.cpp src/Capteurs/MadgwickAHRS.cpp)
 target_link_libraries(Capteurs ${catkin_LIBRARIES})
 add_dependencies(Capteurs drone_generate_messages_cpp)
 

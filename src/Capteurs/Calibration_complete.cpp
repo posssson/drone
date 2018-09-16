@@ -179,7 +179,7 @@ int main (int argc , char** argv)
     }
     if ( i == 3 )
     {
-        int nombre = 5000 ;
+        int nombre = 30000 ;
         float mx_MPU[nombre] , my_MPU[nombre] , mz_MPU[nombre] ;
      
         float mx_MPUc[nombre] , my_MPUc[nombre] , mz_MPUc[nombre] ;
@@ -200,9 +200,10 @@ int main (int argc , char** argv)
 
 
 
-            usleep (1000) ;
 			mpu.getMotion9(&ax, &ay, &az, &gx, &gy, &gz,&mx_MPU[compte], &my_MPU[compte], &mz_MPU[compte]);
 
+			printf("On en est a %d sur %d \n",compte,nombre);
+			printf("mx_MPU[compte] = %f",mx_MPU[compte]);
               }
 
         for ( compte = 0 ; compte < nombre ; compte ++ )
