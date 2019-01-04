@@ -100,7 +100,7 @@ class MPU9250{
         const uint32_t SPI_HS_CLOCK = 20000000; // 20 MHz
 
         // i2c bus frequency
-        const uint32_t _i2cRate = 3200000;
+        const uint32_t _i2cRate = 1000000;
 
         // constants
         const float G = 9.807f;

@@ -42,7 +42,7 @@ void setup() {
 //Altitude
 	fd = wiringPiI2CSetup(BME280_ADDRESS);
 	if (fd < 0) {
-		printf("Device not found");
+		ROS_ERROR("Device not found");
 	}
 	// capeur pression
 	readCalibrationData(fd, &cal);
@@ -61,9 +61,9 @@ void setup() {
 static void printData() {
 
 	// print the data
-/*	printf("distance_ultrason   =%6.6f \n", distance_ultrason);
+	printf("distance_ultrason   =%6.6f \n", distance_ultrason);
 	printf("altitude  =%6.6f \n",altitude);
-	printf("frequence altitude = %6.6f \n", frequence);*/
+	printf("frequence altitude = %6.6f \n", frequence);
 }
 
 void loop() {
@@ -131,7 +131,7 @@ void get_altitude_ultrason(void) {
 	if (ultrason_validity) {
 		//calcul de la distance en cm
 		distance_ultrason = (float) (echo_time * 17000); //cm
-		//ROS_INFO("distance_ultrason =  %f",distance_ultrason);
+		ROS_INFO("distance_ultrason =  %f",distance_ultrason);
 	}
 }
 

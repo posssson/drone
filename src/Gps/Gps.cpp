@@ -14,7 +14,7 @@ using namespace std;
  * This tutorial demonstrates simple receipt of messages over the ROS system.
  */
 int messagerecu =0;
-int fd,i ;
+int fd,i,GPGGA=0 ;
 int nbr;
 int length = 0;
 string dollar_test = "$";
@@ -49,14 +49,29 @@ void gps()
 	// On parse les résultats
 	size_t pos = 0;
 	std::string token;
+	std::string gps_values[20];
+	i=0;
 	while ((pos = gps_message.find(delimiter)) != std::string::npos) {
 	    token = gps_message.substr(0, pos);
-	    //std::cout << token << std::endl;
+	    if (GPGGA != 0)
+	    {
+	    GPGGA = token.compare("GPGGA");
+	    }
+	    if (GPGGA == 0)
+	    {
+	    std::cout <<"token "<< token << std::endl;
+	    gps_values[i]=token;
 	    gps_message.erase(0, pos + delimiter.length());
+	    i++;
+	    }
+	    else
+	    {
+	    	break;
+	    }
 	}
+	GPGGA = 1;
 
-
-	//cout<<gps_message<<endl;
+	//cout  << "gps_message  "<<gps_message<<endl;
 	gps_message.clear();
 
 }

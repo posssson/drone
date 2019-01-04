@@ -161,14 +161,14 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
     	return -1;
     }
 
-	// set the I2C bus speed to 400 kHz
+	// set the I2C bus speed to 3200 kHz
 	if( !writeRegister(I2C_MST_CTRL,I2C_MST_CLK) ){
 		return -1;
 	}
 
 	// check AK8963 WHO AM I register, expected value is 0x48 (decimal 72)
 	if( (int)whoAmIAK8963() != 72 ){
-		std::cout << (int)whoAmIAK8963() << std::endl;
+		//std::cout << (int)whoAmIAK8963() << std::endl;
         return -1;
 	}
 	std::cout << "check AK8963 WHO AM I register, expected value is 0x48 (decimal 72)!" << std::endl;
@@ -209,6 +209,7 @@ int MPU9250::begin(mpu9250_accel_range accelRange, mpu9250_gyro_range gyroRange)
     readAK8963Registers(AK8963_HXL,sizeof(data),&data[0]);
 
     // successful init, return 0
+    std::cout << "successful init MPU9250" << std::endl;
     return 0;
 }
 

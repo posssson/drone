@@ -15,9 +15,6 @@
 #include "I2Cdev.h"
 #include "MPU9250.h"
 #include <wiringPi.h>
-#include "../Common/LowPassFilter2p.hpp"
-#include "../Common/Biquad.h"
-#include "MadgwickAHRS.c"
 #include "MadgwickAHRS.hpp"
 #include <errno.h>
 
@@ -28,39 +25,29 @@
 // AD0 high = 0x69
 
 MPU9250 mpu(0x68);
-math::LowPassFilter2p LPFAcc_x(1000, 50);
-math::LowPassFilter2p LPFAcc_y(1000, 50);
-math::LowPassFilter2p LPFAcc_z(1000, 50);
-math::LowPassFilter2p LPFGyro_x(1000, 50);
-math::LowPassFilter2p LPFGyro_y(1000, 50);
 float ax, ay, az;
 float gx, gy, gz;
 float mx, my, mz;
 
 float roll,pitch ,heading;
-Madgwick filter;
+Madgwick filter,filter_magneto;
 int i = 1;
-float gyroScale = 131;
-float arx, ary, arz, grx, gry, grz, gsx, gsy, gsz;
 float timePrev = 0, timet = 0, timeStep = 0;
-float ypr[3];
 struct timeval tv;
 float anglex = 0, angley = 0, anglez = 0;
 float angle_x = 0, angle_y = 0, angle_z = 0;
 float temps_proc = 0;
 float anglex_prec = 0, angley_prec = 0, anglez_prec = 0;
 float vitx = 0, vity = 0;
-float angle_accel_x = 0, angle_accel_y = 0;
 struct timespec time_actuel, ancien_temps, temps_attente,
 		temps_attente_nanosleep;
-float temps_recup_altitude = 0;
-float frequence = 0;
-Biquad *lpFilterX = new Biquad(); // create a Biquad, lpFilter;
-Biquad *lpFilterY = new Biquad(); // create a Biquad, lpFilter;
-Biquad *lpFilterZ = new Biquad(); // create a Biquad, lpFilter;
-
+float temps_recup_altitude = 0,temps_publication_message=0;
+float frequence = 10;
 float sec_to_nano = 1000000000;
 int fd;
 int it = 0;
-
+float betaRollPitch= 0.2, betaYaw = 1.5;
 void setup();
+void calibrate_value();
+
+

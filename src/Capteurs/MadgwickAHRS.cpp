@@ -26,7 +26,7 @@
 // Definitions
 
 #define sampleFreqDef   512.0f          // sample frequency in Hz
-#define betaDef         0.1f            // 2 * proportional gain
+#define betaDef        0.025f            // 2 * proportional gain
 
 
 //============================================================================================
@@ -239,7 +239,7 @@ void Madgwick::updateIMU(float gx, float gy, float gz, float ax, float ay, float
 float Madgwick::invSqrt(float x) {
     float halfx = 0.5f * x;
     float y = x;
-    long i = *(long*)&y;
+    int32_t i = *(int32_t *)&y;
     i = 0x5f3759df - (i>>1);
     y = *(float*)&i;
     y = y * (1.5f - (halfx * y * y));
