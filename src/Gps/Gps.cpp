@@ -59,7 +59,7 @@ void gps()
 	    }
 	    if (GPGGA == 0)
 	    {
-	    std::cout <<"token "<< token << std::endl;
+	   // std::cout <<"token "<< token << std::endl;
 	    gps_values[i]=token;
 	    gps_message.erase(0, pos + delimiter.length());
 	    i++;
