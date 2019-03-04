@@ -94,13 +94,18 @@ void recuperation_initialisation(const std_msgs::String::ConstPtr& msg,
 }
 
 float get_altitude() {
-	// Recupération altitude
+	// RecupÃ©ration altitude 10 fois plus moyenne
+	altitude = 0;
+	for (int i=0;i<10;i++)
+	{
 	readCalibrationData(fd, &cal);
 	wiringPiI2CWriteReg8(fd, 0xf4, 0x25); // pressure and temperature oversampling x 1, mode normal
 	getRawData(fd, &raw);
 	t_fine = getTemperatureCalibration(&cal, raw.temperature);
 	p = compensatePressure(raw.pressure, &cal, t_fine) / 100; // hPa
-	altitude = getAltitude(p);                        // meters
+	altitude += getAltitude(p);   
+	}// meters
+	altitude = altitude/10;
 	return altitude;
 
 }
