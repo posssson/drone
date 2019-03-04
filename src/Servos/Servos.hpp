@@ -53,7 +53,7 @@ int it =0,it_optim=0;
 float test = 0;
 int recu_init = 0;
 float altitude_init[2];
-float attitude[6],altitude[2]={0,0}; // Altitude baro - ultrason
+float attitude[6],altitude[2]={0,0},altitude_capteur[2]={0,0}; // Altitude baro - ultrason
 float vitesse_altitude[2]={0,0};
 float consigne[4]= { 0, 0, 0, 0 };
 float clavier[3];
