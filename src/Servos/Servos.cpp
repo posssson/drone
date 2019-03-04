@@ -176,13 +176,18 @@ int main(int argc, char **argv)
 
 			// Calcul PID vitesse
 			calcul_pid_vitesse();
-
+			
 			// Saturation commadne tangage et roulis
 			commande_vit[tangage] = saturation(commande_vit[tangage],-250,250);
 			commande_vit[roulis] = saturation(commande_vit[roulis],-250,250);
-
+				
+			// Calcul du PID sur altitude et la vitesse de deplacement vertical
+			calcul_pid_altitude();
+			
 			calcul_valeur_commande_moteur();
-
+			
+			
+			
 			// security gaz can be set
 			if (arret == 0 && gaz <1100)
 			{
@@ -303,6 +308,10 @@ void calcul_pid_vitesse()
 	erreur_precedente_vit[lacet] = erreur_vit[lacet];
 }
 
+void calcul_pid_altitude()
+{
+	
+}
 void calcul_valeur_commande_moteur()
 {
 	// Ajout de la commande de gaz
