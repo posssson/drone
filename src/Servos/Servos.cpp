@@ -141,12 +141,14 @@ int main(int argc, char **argv)
 				raz = 0;
 				init_lacet = attitude[lacet];
 				consigne[lacet] = 0;
-				altitude_init[IDbarometre] = altitude[IDbarometre];
-				altitude_init[IDultrason] = altitude[IDultrason];
+				altitude_init[IDbarometre] = altitude_capteur[IDbarometre];
+				altitude_init[IDultrason] = altitude_capteur[IDultrason];
 			}
 			else
 			{
 				raz = 1;
+				altitude[IDbarometre] = altitude_capteur[IDbarometre] - altitude_capteur[IDbarometre];
+				altitude[IDultrason] = altitude_capteur[IDultrason] - altitude_capteur[IDultrason];
 			}
 
 
