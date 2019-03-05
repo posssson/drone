@@ -310,7 +310,16 @@ void calcul_pid_vitesse()
 
 void calcul_pid_altitude()
 {
-	
+	// limite altitude pour les test = 1m
+	commande_altitude[IDbarometre] = 0;
+	if (altitude[IDbarometre]>1)
+	{
+	commande_altitude[IDbarometre] = -100*(altitude[IDbarometre]-1);
+	}
+	if (abs(vitesse_altitude[IDbarometre]) > 0.6)
+	{
+	commande_altitude[IDbarometre] += -50 *vitesse_altitude[IDbarometre];
+	}
 }
 void calcul_valeur_commande_moteur()
 {
