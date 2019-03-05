@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 	boost::function<void(const drone::Capteurs_msg::ConstPtr& msg)> temp = boost::bind(recuperation_capteur, _1, &recu_init, attitude);
 	ros::Subscriber sub = n.subscribe("capteurs", 1, temp);
 
-	boost::function<void(const drone::Altitude_msg::ConstPtr& msg)> temp4 = boost::bind(recuperation_altitude, _1, altitude_capteur);
+	boost::function<void(const drone::Altitude_msg::ConstPtr& msg)> temp4 = boost::bind(recuperation_altitude, _1, altitude,vitess_altitude);
 	ros::Subscriber sub4 = n.subscribe("altitude", 1, temp4);
 
 	boost::function<void(const drone::Clavier_msg::ConstPtr& msg)> temp2 = boost::bind(recuperation_clavier, _1,Kp_vit, Ki_vit_default, Kd_vit_default,Kp,Ki_default,Kd_default);
@@ -141,16 +141,12 @@ int main(int argc, char **argv)
 				raz = 0;
 				init_lacet = attitude[lacet];
 				consigne[lacet] = 0;
-				altitude_init[IDbarometre] = altitude_capteur[IDbarometre];
-				altitude_init[IDultrason] = altitude_capteur[IDultrason];
+				altitude_init[IDbarometre] = altitude[IDbarometre];
+				altitude_init[IDultrason] = altitude[IDultrason];
 			}
 			else
 			{
 				raz = 1;
-				altitude[IDbarometre] = altitude_capteur[IDbarometre]-altitude[IDbarometre];
-				altitude[IDultrason] = altitude_capteur[IDultrason]-altitude[IDultrason];
-				vitesse_altitude[IDbarometre] = altitude_precedent[IDbarometre]-altitude[IDbarometre]/(float)temps_proc;
-				vitesse_altitude[IDultrason] = altitude_precedent[IDultrason]-altitude[IDultrason]/(float)temps_proc;
 			}
 
 
@@ -454,10 +450,12 @@ float saturation(float a,int min,int max)
 }
 
 
-void recuperation_altitude(const drone::Altitude_msg::ConstPtr& _msg, float _altitude_capteur[2])
+void recuperation_altitude(const drone::Altitude_msg::ConstPtr& _msg, float _altitude_capteur[2],float _vitess_altitude[2])
 {
-	_altitude_capteur[0] = _msg->altitude_baro;
-	_altitude_capteur[1] = _msg->altitude_ultrason;
+	_altitude[0] = _msg->altitude_baro;
+	_altitude[1] = _msg->altitude_ultrason;
+	_vitess_altitude[0] = _msg->vitesse_altitude_baro;
+	_vitess_altitude[1] = _msg->vitesse_altitude_ultrason;
 }
 void recuperation_capteur(const drone::Capteurs_msg::ConstPtr& _msg, int *recu_init, float _attitude[6])
 {
