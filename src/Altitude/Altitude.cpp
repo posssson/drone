@@ -63,6 +63,7 @@ static void printData() {
 	// print the data
 	printf("distance_ultrason   =%6.6f \n", distance_ultrason);
 	printf("altitude  =%6.6f \n",altitude);
+	printf("vitesse altitude  =%6.6f \n",vitesse_altitude);
 	printf("frequence altitude = %6.6f \n", frequence);
 }
 
@@ -77,6 +78,12 @@ void loop() {
 
 		temps_recup_altitude = 0;
 		altitude_baro = get_altitude();
+	
+		altitude[IDbarometre] = altitude_capteur[IDbarometre]-altitude[IDbarometre];
+		altitude[IDultrason] = altitude_capteur[IDultrason]-altitude[IDultrason];
+		vitesse_altitude[IDbarometre] = altitude_precedent[IDbarometre]-altitude[IDbarometre]/(float)temps_proc;
+		vitesse_altitude[IDultrason] = altitude_precedent[IDultrason]-altitude[IDultrason]/(float)temps_proc;
+			
 		digitalWrite(PIN_PULSE, HIGH);
 		sleep(0.00001);
 		digitalWrite(PIN_PULSE, LOW);
