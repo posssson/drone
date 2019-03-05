@@ -36,7 +36,9 @@ int main(int argc, char **argv)
 
 	// Ouverture d'un fichier pour stocker les données
 	ofstream fichier("/home/pi/drone_ws/src/drone/src/donnees.txt", ios::out | ios::trunc); 
-
+	// Ecriture premiere ligne
+	fichier << "angle tangage  angle roulis   attitude[4]  attitude[3]  commande[tangage]  commande[roulis]   commande_vit[tangage]  commande_vit[roulis]  altitude[IDbarometre] vitesse_altitude[IDbarometre]"<<endl;
+			}
 	// Initialisation des gpio
 	if (gpioInitialise() < 0)
 	{
@@ -209,7 +211,7 @@ int main(int argc, char **argv)
 				gpioPWM(moteur_deriere_droit, commande_derierre_droit);   // OK
 				gpioPWM(moteur_deriere_gauche, commande_derierre_gauche);
 				// Inscription dans un fichier les valeurs
-				fichier << " " << attitude[tangage] << " " << attitude[roulis] << " "<<attitude[4] << " " << attitude[3]  << " " << commande[tangage]<<" " << commande[roulis] << "  " << commande_vit[tangage] << " " << commande_vit[roulis] << endl;
+				fichier << " " << attitude[tangage] << " " << attitude[roulis] << " "<<attitude[4] << " " << attitude[3]  << " " << commande[tangage]<<" " << commande[roulis] << "  " << commande_vit[tangage] << " " << commande_vit[roulis] <<" "<< altitude[IDbarometre]<<" "<< vitesse_altitude[IDbarometre]<<endl;
 			}
 
 			else // On bloque les moteurs
@@ -324,10 +326,10 @@ void calcul_pid_altitude()
 void calcul_valeur_commande_moteur()
 {
 	// Ajout de la commande de gaz
-	commande_derierre_droit = gaz;
-	commande_derierre_gauche = gaz;
-	commande_devant_droit = gaz;
-	commande_devant_gauche = gaz;
+	commande_derierre_droit = gaz + commande_altitude[IDbarometre];
+	commande_derierre_gauche = gaz + commande_altitude[IDbarometre];
+	commande_devant_droit = gaz + commande_altitude[IDbarometre];
+	commande_devant_gauche = gaz + commande_altitude[IDbarometre];
 
 	// Mise en place de la commadne en fonction positif négatif
 	if (commande_vit[tangage] < 0)
