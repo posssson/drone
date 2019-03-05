@@ -31,6 +31,7 @@ uint32_t tick_precedent_lacet = 0, temps_haut_lacet = 0;
 int roulis = 1, tangage =0 ,lacet = 2;
 float gaz = 1100;
 float commande_devant_droit = 0, commande_devant_gauche = 0, commande_derierre_gauche = 0, commande_derierre_droit = 0;
+float commande_altitude[2] ={0,0};
 float arret = 0;
 int raz = 0;
 float init_lacet = 0;
