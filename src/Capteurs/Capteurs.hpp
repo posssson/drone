@@ -46,6 +46,7 @@ float frequence = 10;
 float sec_to_nano = 1000000000;
 int fd;
 int it = 0;
+bool print =true;
 float betaRollPitch= 0.2, betaYaw = 1.5;
 void setup();
 void calibrate_value();

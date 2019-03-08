@@ -17,7 +17,8 @@ void setup() {
 }
 
 static void printData() {
-
+ if (print)
+ {
 	// print the data
 	/* printf("ax  =%6.6f\n", ax);
 	 printf("ay  =%6.6f\n", ay);
@@ -38,6 +39,7 @@ static void printData() {
 	/*printf("mx  =%6.6f\n", mx);
 	 printf("my  =%6.6f\n", my);
 	 printf("mz  =%6.6f\n", mz);*/
+ }
 }
 void loop() {
 	clock_gettime(CLOCK_REALTIME, &time_actuel);
@@ -56,8 +58,8 @@ void loop() {
 
 	if ((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f))
 	{
-		ROS_ERROR("magneto HS");
-		while (1) sleep(1); // TODO
+		//ROS_ERROR("magneto HS");
+		//while (1) sleep(1); // TODO
 	}
 	// calibration
 	calibrate_value();

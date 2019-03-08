@@ -1,2 +1,4 @@
 float32 altitude_baro
 float32 altitude_ultrason
+float32 vitesse_altitude_baro
+float32 vitesse_altitude_ultrason

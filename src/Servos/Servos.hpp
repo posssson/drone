@@ -45,7 +45,7 @@ double somme_erreurs_total = 0;
 // initialisation moteur
 int moteur_devant_gauche = 27;
 int moteur_deriere_gauche = 6;
-int moteur_deriere_droit = 5;
+int moteur_deriere_droit = 13;
 int moteur_devant_droit = 17;
 	
 // Itération des optimisations
@@ -72,13 +72,14 @@ int sens_rotation_z = 1;
 void calcul_pid_angle();
 void calcul_pid_vitesse();
 void calcul_valeur_commande_moteur();
+void calcul_pid_altitude();
 void recuperation_cmd_gaz(int gpio, int level, uint32_t tick);
 void recuperation_cmd_tangage(int gpio, int level, uint32_t tick);
 void recuperation_cmd_roulis(int gpio, int level, uint32_t tick);
 void recuperation_cmd_lacet(int gpio, int level, uint32_t tick);
 void recuperation_cmd_arret(int gpio, int level, uint32_t tick);
 float saturation(float a,int min,int max);
-void recuperation_altitude(const drone::Altitude_msg::ConstPtr& _msg, float _altitude[2]);
+void recuperation_altitude(const drone::Altitude_msg::ConstPtr& _msg, float _altitude[2],float _vitesse_altitude[2]);
 void recuperation_capteur(const drone::Capteurs_msg::ConstPtr& _msg, int *recu_init, float _attitude[5]);
 void recuperation_clavier(const drone::Clavier_msg::ConstPtr& _msg, float *_kp, float *_ki, float *_kd,float *_kpp,float *_kii,float *_kdd);
 void recuperation_optim(const drone::Optim_msg::ConstPtr& _msg, float *_kp,float *_ki, float *_kd,float *_kpp,float *_kdd);

@@ -20,12 +20,16 @@ float altitude_baro = 0;
 
 float sec_to_nano = 1000000000;
 int32_t t_fine;
+bool print =false;
 float t; // C
 float p; // hPa
 float h;       // %
-float altitude;                         // meters
+float altitude[2],vitesse_altitude[2],altitude_capteur[2],altitude_precedent[2],altitude_init[2];                         // meters
 int ultrason_validity = 0;
-
+enum {
+	IDbarometre,
+	IDultrason,
+};
 int fd;
 int it = 0;
 bme280_raw_data raw;
@@ -56,15 +60,18 @@ void setup() {
 	wiringPiISR(PIN_ECHO, INT_EDGE_RISING, get_altitude_ultrason); /// Mettre des commentaires
 
 	// TODO calibrer valeur instant 0
+	altitude_init[IDbarometre]=get_altitude();
 }
 
 static void printData() {
-
+if (print)
+{
 	// print the data
 	printf("distance_ultrason   =%6.6f \n", distance_ultrason);
-	printf("altitude  =%6.6f \n",altitude);
-	printf("vitesse altitude  =%6.6f \n",vitesse_altitude);
+	printf("altitude  =%6.6f \n",altitude[IDbarometre]);
+	printf("vitesse altitude  =%6.6f \n",vitesse_altitude[IDbarometre]);
 	printf("frequence altitude = %6.6f \n", frequence);
+}
 }
 
 void loop() {
@@ -79,11 +86,12 @@ void loop() {
 		temps_recup_altitude = 0;
 		altitude_baro = get_altitude();
 	
-		altitude[IDbarometre] = altitude_capteur[IDbarometre]-altitude[IDbarometre];
-		altitude[IDultrason] = altitude_capteur[IDultrason]-altitude[IDultrason];
-		vitesse_altitude[IDbarometre] = altitude_precedent[IDbarometre]-altitude[IDbarometre]/(float)temps_proc;
-		vitesse_altitude[IDultrason] = altitude_precedent[IDultrason]-altitude[IDultrason]/(float)temps_proc;
-			
+		altitude[IDbarometre] = altitude_capteur[IDbarometre]-altitude_init[IDbarometre];
+		altitude[IDultrason] = altitude_capteur[IDultrason]-altitude_init[IDultrason];
+		vitesse_altitude[IDbarometre] = (altitude_precedent[IDbarometre]-altitude[IDbarometre])/(float)temps_proc;
+		vitesse_altitude[IDultrason] = (altitude_precedent[IDultrason]-altitude[IDultrason])/(float)temps_proc;
+		altitude_precedent[IDbarometre] = altitude[IDbarometre];
+		altitude_precedent[IDultrason] = altitude[IDultrason];
 		digitalWrite(PIN_PULSE, HIGH);
 		sleep(0.00001);
 		digitalWrite(PIN_PULSE, LOW);
@@ -102,7 +110,7 @@ void recuperation_initialisation(const std_msgs::String::ConstPtr& msg,
 
 float get_altitude() {
 	// Recupération altitude 10 fois plus moyenne
-	altitude = 0;
+	altitude_capteur[IDbarometre] = 0;
 	for (int i=0;i<10;i++)
 	{
 	readCalibrationData(fd, &cal);
@@ -110,10 +118,10 @@ float get_altitude() {
 	getRawData(fd, &raw);
 	t_fine = getTemperatureCalibration(&cal, raw.temperature);
 	p = compensatePressure(raw.pressure, &cal, t_fine) / 100; // hPa
-	altitude += getAltitude(p);   
+	altitude_capteur[IDbarometre] += getAltitude(p);
 	}// meters
-	altitude = altitude/10;
-	return altitude;
+	altitude_capteur[IDbarometre] = altitude_capteur[IDbarometre]/10;
+	return altitude_capteur[IDbarometre];
 
 }
 
@@ -142,8 +150,8 @@ void get_altitude_ultrason(void) {
 
 	if (ultrason_validity) {
 		//calcul de la distance en cm
-		distance_ultrason = (float) (echo_time * 17000); //cm
-		ROS_INFO("distance_ultrason =  %f",distance_ultrason);
+		distance_ultrason = (float) (echo_time * 170); //m
+		//ROS_INFO("distance_ultrason =  %f",distance_ultrason);
 	}
 }
 
@@ -169,8 +177,10 @@ int main(int argc, char **argv) {
 		usleep(200000); // 0.2 secs
 		loop();
 		if (recu_init == 1) {
-			msg_altitude.altitude_baro = altitude;
+			msg_altitude.altitude_baro = altitude[IDbarometre];
 			msg_altitude.altitude_ultrason = distance_ultrason;
+			msg_altitude.vitesse_altitude_baro = vitesse_altitude[IDbarometre];
+			msg_altitude.vitesse_altitude_ultrason = vitesse_altitude[IDultrason];
 			_pub_msg_altitude.publish(msg_altitude);
 		} else {
 		}

@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 	boost::function<void(const drone::Capteurs_msg::ConstPtr& msg)> temp = boost::bind(recuperation_capteur, _1, &recu_init, attitude);
 	ros::Subscriber sub = n.subscribe("capteurs", 1, temp);
 
-	boost::function<void(const drone::Altitude_msg::ConstPtr& msg)> temp4 = boost::bind(recuperation_altitude, _1, altitude,vitess_altitude);
+	boost::function<void(const drone::Altitude_msg::ConstPtr& msg)> temp4 = boost::bind(recuperation_altitude, _1, altitude,vitesse_altitude);
 	ros::Subscriber sub4 = n.subscribe("altitude", 1, temp4);
 
 	boost::function<void(const drone::Clavier_msg::ConstPtr& msg)> temp2 = boost::bind(recuperation_clavier, _1,Kp_vit, Ki_vit_default, Kd_vit_default,Kp,Ki_default,Kd_default);
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 	ofstream fichier("/home/pi/drone_ws/src/drone/src/donnees.txt", ios::out | ios::trunc); 
 	// Ecriture premiere ligne
 	fichier << "angle tangage  angle roulis   attitude[4]  attitude[3]  commande[tangage]  commande[roulis]   commande_vit[tangage]  commande_vit[roulis]  altitude[IDbarometre] vitesse_altitude[IDbarometre]"<<endl;
-			}
+
 	// Initialisation des gpio
 	if (gpioInitialise() < 0)
 	{
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 		printf(" GPIO OK\n");
 	}
 
-	gpioSetAlertFunc(13, recuperation_cmd_gaz);
+	gpioSetAlertFunc(19, recuperation_cmd_gaz);
 	gpioSetAlertFunc(23, recuperation_cmd_tangage);
 	gpioSetAlertFunc(24, recuperation_cmd_lacet);
 	gpioSetAlertFunc(26, recuperation_cmd_roulis);
@@ -203,6 +203,7 @@ int main(int argc, char **argv)
 
 			if (arret == 1 && gaz >1100 && initialisation_lacet==1)
 			{
+				//printf("commande_devant_droit = %f", commande_devant_droit);
 				optim = 0; // todo changer pour lancer optim
 				gpioPWM(moteur_devant_droit, commande_devant_droit);  // OK
 				gpioPWM(moteur_devant_gauche, commande_devant_gauche);  // Moyenement OK
@@ -320,6 +321,7 @@ void calcul_pid_altitude()
 	{
 	commande_altitude[IDbarometre] += -50 *vitesse_altitude[IDbarometre];
 	}
+	commande_altitude[IDbarometre] = 0; // TODO
 }
 void calcul_valeur_commande_moteur()
 {
@@ -351,7 +353,7 @@ void calcul_valeur_commande_moteur()
 		commande_derierre_gauche -= commande_vit[roulis];
 		commande_devant_gauche -= commande_vit[roulis];
 	}
-
+	commande[lacet] = 0 ; //TODO
 	commande_devant_gauche -= commande[lacet];
 	commande_derierre_droit -= commande[lacet];
 
@@ -376,7 +378,7 @@ void recuperation_cmd_gaz(int gpio, int level, uint32_t tick)
 	else
 	{
 		temps_haut_gaz = tick - tick_precedent_gaz;
-		//printf("GPIO temps_haut_gaz haut = %d", temps_haut_gaz);
+		//printf("GPIO temps_haut_gaz haut = %d \n", temps_haut_gaz);
 
 	}
 }
@@ -421,7 +423,7 @@ void recuperation_cmd_lacet(int gpio, int level, uint32_t tick)
 	else
 	{
 		temps_haut_lacet = tick - tick_precedent_lacet;
-		//printf("GPIO temps_haut_lacet haut = %d", temps_haut_lacet);
+		//printf("GPIO temps_haut_lacet haut = %d \n", temps_haut_lacet);
 
 	}
 }
@@ -452,12 +454,12 @@ float saturation(float a,int min,int max)
 }
 
 
-void recuperation_altitude(const drone::Altitude_msg::ConstPtr& _msg, float _altitude_capteur[2],float _vitess_altitude[2])
+void recuperation_altitude(const drone::Altitude_msg::ConstPtr& _msg, float _altitude[2],float _vitesse_altitude[2])
 {
 	_altitude[0] = _msg->altitude_baro;
 	_altitude[1] = _msg->altitude_ultrason;
-	_vitess_altitude[0] = _msg->vitesse_altitude_baro;
-	_vitess_altitude[1] = _msg->vitesse_altitude_ultrason;
+	_vitesse_altitude[0] = _msg->vitesse_altitude_baro;
+	_vitesse_altitude[1] = _msg->vitesse_altitude_ultrason;
 }
 void recuperation_capteur(const drone::Capteurs_msg::ConstPtr& _msg, int *recu_init, float _attitude[6])
 {
