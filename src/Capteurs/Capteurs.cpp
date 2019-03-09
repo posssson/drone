@@ -14,6 +14,11 @@ void setup() {
 	printf("Testing device connections...\n");
 	int reset = 0;
 	mpu.begin(ACCEL_RANGE_4G, GYRO_RANGE_250DPS); // TODO mettre message erreur si raté
+	mpu.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
+	if ((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f))
+	{
+		ROS_ERROR("magneto HS");
+	}
 }
 
 static void printData() {
@@ -56,11 +61,6 @@ void loop() {
 	frequence = 1 / temps_proc;
 	mpu.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
 
-	if ((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f))
-	{
-		//ROS_ERROR("magneto HS");
-		//while (1) sleep(1); // TODO
-	}
 	// calibration
 	calibrate_value();
 
@@ -165,12 +165,12 @@ int main(int argc, char **argv) {
 
 void calibrate_value()
 {
-	gx -= 1.80;
-	gy += 1.55;
-	gz -= 2.5;
-	ax = ax * 0.998149 - 0.6887797;
-	ay = ay * 0.99829 - 1.4973;
-	az = az * 0.985832 - 1.33133;
+	gx -= 1.50;
+	gy += 1.05;
+	gz -= 1.5;
+	ax -= 0.674362;
+	ay -= 0.439529;
+	az -= 0.9725;
 	mx += 7;
 	my -=22;
 	mz -= 20;

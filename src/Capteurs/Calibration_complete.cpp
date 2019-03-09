@@ -346,7 +346,7 @@ int sphere_fit_least_squares2 (const float *hx , const float *hy , const float *
 
 int do_accel_calibration_measurements (double accel_offs_MPU[3]  , double accel_T_MPU[3][3] ,  MPU9250 * mpu )
 {
-    const int samples_num = 1000 ;	//RF_ONERA
+    const int samples_num = 10000 ;	//RF_ONERA
     double accel_ref_MPU[6][3] ;
     bool data_collected[7] = { false , false , false , false , false , false , true } ;
     const char *orientation_strs[7] = { "x+" , "x-" , "y+" , "y-" , "z+" , "z-" , "INCONNUE" } ;
@@ -488,10 +488,12 @@ int read_accelerometer_avg (MPU9250 *sub_sensor_combined , double accel_avg[3] ,
     while ( count < samples_num )
     {
 
-        usleep (1000) ;
         float accel_ema[3] = { 0.0f , 0.0f , 0.0f } ;
 
 		mpu.getMotion9(&accel_ema[0], &accel_ema[1], &accel_ema[2], &gx, &gy, &gz,&mx, &my, &mz);
+		accel_ema[0] -= 0.674362;
+		accel_ema[1] -= 0.439529;
+		accel_ema[2] -= 0.9725;
         for ( int i = 0 ; i < 3 ; i++ )
             accel_sum[i] += accel_ema[i] ; // On fait la somme des trois valeurs.
 
@@ -501,7 +503,7 @@ int read_accelerometer_avg (MPU9250 *sub_sensor_combined , double accel_avg[3] ,
 
     for ( int i = 0 ; i < 3 ; i++ )
     {
-        accel_avg[i] = (double)accel_sum[i] / count ; // On fait la moyenne sur les messures.
+        accel_avg[i] = (double)accel_sum[i] / (double)count ; // On fait la moyenne sur les messures.
     }
     cout << "Calcul moyenne x = " << accel_avg[0] << endl ;
     cout << "Calcul moyenne y = " << accel_avg[1] << endl ;

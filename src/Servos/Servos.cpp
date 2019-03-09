@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 			consigne[roulis] = 0;
 
 			// RAZ permet de mettre le Ki ou pas.
-			if (gaz < 1100)
+			if (gaz < 1100 || gaz >2000)
 			{
 				raz = 0;
 				init_lacet = attitude[lacet];
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
 			
 			
 			// security gaz can be set
-			if (arret == 0 && gaz <1100)
+			if (arret == 0 && (gaz <1100 || gaz>2000))
 			{
 				arret = 1;
 			}
@@ -201,7 +201,7 @@ int main(int argc, char **argv)
 
 			}
 
-			if (arret == 1 && gaz >1100 && initialisation_lacet==1)
+			if (arret == 1 && gaz >1100 && gaz<2000 && initialisation_lacet==1)
 			{
 				//printf("commande_devant_droit = %f", commande_devant_droit);
 				optim = 0; // todo changer pour lancer optim
@@ -222,7 +222,7 @@ int main(int argc, char **argv)
 				gpioPWM(moteur_devant_droit, 1000);
 			}
 
-			if (optim == 1 && gaz >1100) {
+			if (optim == 1 && gaz >1100 && gaz<2000) {
 				//it_optim ++;
 				somme_erreurs_total += ((abs(erreur_vit[roulis]) + abs(erreur_vit[tangage]))/temps_proc)/10;  
 				somme_erreurs_total += (abs(erreur[roulis]) + abs(erreur[tangage]))/temps_proc;  
