@@ -79,8 +79,7 @@ void loop() {
 	// print the heading, pitch and roll
 	anglex = filter.getRoll();
 	angley = filter.getPitch();
-	anglez = fabs(filter_magneto.getYaw())-180;
-
+	anglez = sin((fabs(filter_magneto.getYaw())-180)*3.14159265/180)*180; // angle entre -180 et 180 sans discontinuité (ajouter si il pointe à droite ou à gauche) TODO
 	/////////////////////////////
 
 	if (temps_proc != 0) {
@@ -168,9 +167,9 @@ void calibrate_value()
 	gx -= 1.50;
 	gy += 1.05;
 	gz -= 1.5;
-	ax -= 0.674362;
-	ay -= 0.439529;
-	az -= 0.9725;
+	ax -= 0.943294;
+	ay += 0.096047;
+	az -= 1.45597;
 	mx += 7;
 	my -=22;
 	mz -= 20;

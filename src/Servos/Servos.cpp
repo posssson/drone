@@ -91,9 +91,10 @@ int main(int argc, char **argv)
 		// Initialisation vrai quand tout est initialisé
 		if (recu_init == 1)
 		{
-			if (initialisation_lacet == 0 && abs(attitude[tangage])<5 && abs(attitude[roulis])<5)
+			if (initialisation_lacet == 0 && abs(attitude[tangage])<5 && abs(attitude[roulis])<5 && gaz >1200)
 			{
 				ROS_INFO("Tout est OK");
+				printf("arret gaz = %f\n", gaz);
 
 				init_lacet = attitude[lacet];
 				initialisation_lacet = 1;
@@ -122,22 +123,25 @@ int main(int argc, char **argv)
 			gaz_actuel = gaz;
 
 			// Calcul PID Commande roulis/tangage
-			if (fabs(((float)temps_haut_roulis- 1500.0))>10)
+			if (fabs(((float)temps_haut_roulis- 1500.0))>20)
 			{consigne[roulis] =((float)temps_haut_roulis- 1500.0)/10.0;}
-			if (fabs(((float)temps_haut_tangage- 1500.0))>10)
+			if (fabs(((float)temps_haut_tangage- 1500.0))>20)
 			{consigne[tangage] =-((float)temps_haut_tangage - 1500.0)/10.0;}
-			if (fabs(((float)temps_haut_lacet- 1500.0))>10)
+			if (fabs(((float)temps_haut_lacet- 1500.0))>20)
 			{
-				consigne[lacet] +=((float)temps_haut_lacet - 1500.0)*temps_proc*sens_rotation_z/10.0;
+				consigne[lacet] +=((float)temps_haut_lacet - 1500.0)/temps_proc*sens_rotation_z/200000;
+				//ROS_INFO("lacet = %f",((float)temps_haut_lacet - 1500.0)/temps_proc*sens_rotation_z/200000);
 			}
 
 			// Mise à zéro si test sans manette
 			consigne[tangage] = 0;
 			consigne[roulis] = 0;
+			//consigne[lacet] = 0;
 
 			// RAZ permet de mettre le Ki ou pas.
-			if (gaz < 1100 || gaz >2000)
+			if (gaz < 1150 || gaz >2000)
 			{
+				arret = 0;
 				raz = 0;
 				init_lacet = attitude[lacet];
 				consigne[lacet] = 0;
@@ -173,40 +177,47 @@ int main(int argc, char **argv)
 			// Saturation de la commande en angle.
 			commande[tangage] = saturation(commande[tangage],-35,35);
 			commande[roulis] = saturation(commande[roulis],-35,35);
-
+			commande[lacet] = saturation(commande[lacet],-75,75);
 			// Calcul PID vitesse
 			calcul_pid_vitesse();
 			
 			// Saturation commadne tangage et roulis
 			commande_vit[tangage] = saturation(commande_vit[tangage],-250,250);
 			commande_vit[roulis] = saturation(commande_vit[roulis],-250,250);
-				
+			commande_vit[lacet] = saturation(commande_vit[lacet],-75,75);
 			// Calcul du PID sur altitude et la vitesse de deplacement vertical
 			calcul_pid_altitude();
 			
 			calcul_valeur_commande_moteur();
 			
-			
-			
-			// security gaz can be set
-			if (arret == 0 && (gaz <1100 || gaz>2000))
+
+
+			// Sécurité sur les angles pour les tests 
+			if ((abs( attitude[tangage]) > 25 || abs( attitude[roulis])>25) || gaz <1150 || gaz >2000 )
+			{
+				arret = 0;
+				//printf("arret gaz = %f\n", gaz);
+			}
+			else
 			{
 				arret = 1;
 			}
-
-			// Sécurité sur les angles pour les tests 
-			if ((abs( attitude[tangage]) > 25 || abs( attitude[roulis])>25) && arret == 1)
+			optim = 0; // todo changer pour lancer optim
+			if (arret == 1 && initialisation_lacet==1)
 			{
-				arret = 0;
-
-			}
-
-			if (arret == 1 && gaz >1100 && gaz<2000 && initialisation_lacet==1)
-			{
-				//printf("commande_devant_droit = %f", commande_devant_droit);
-				optim = 0; // todo changer pour lancer optim
+				if (print >200)
+				{
+					print =0;
+					printf("gaz = %f\n", gaz);
+					printf("commande_devant_gauche = %f\n ", commande_devant_gauche);
+					printf("commande_devant_droit = %f\n ", commande_devant_droit);
+					printf("commande_derierre_gauche = %f\n ", commande_derierre_gauche);
+					printf("commande_derierre_droit = %f \n", commande_derierre_droit);
+					printf("commande[lacet] = %f\n ", commande[lacet]);
+				}
+				print ++;
 				gpioPWM(moteur_devant_droit, commande_devant_droit);  // OK
-				gpioPWM(moteur_devant_gauche, commande_devant_gauche);  // Moyenement OK
+				gpioPWM(moteur_devant_gauche, commande_devant_gauche);  //  OK
 				gpioPWM(moteur_deriere_droit, commande_derierre_droit);   // OK
 				gpioPWM(moteur_deriere_gauche, commande_derierre_gauche);
 				// Inscription dans un fichier les valeurs
@@ -215,7 +226,7 @@ int main(int argc, char **argv)
 
 			else // On bloque les moteurs
 			{
-				optim = 1;
+
 				gpioPWM(moteur_devant_gauche, 1000);
 				gpioPWM(moteur_deriere_gauche, 1000);
 				gpioPWM(moteur_deriere_droit, 1000);
@@ -353,12 +364,13 @@ void calcul_valeur_commande_moteur()
 		commande_derierre_gauche -= commande_vit[roulis];
 		commande_devant_gauche -= commande_vit[roulis];
 	}
-	commande[lacet] = 0 ; //TODO
-	commande_devant_gauche -= commande[lacet];
-	commande_derierre_droit -= commande[lacet];
+	//printf("commande[lacet] = %f \n", commande[lacet]);
+	commande_vit[lacet] = 0 ; //TODO
+	commande_devant_gauche -= commande_vit[lacet];
+	commande_derierre_droit -= commande_vit[lacet];
 
-	commande_devant_droit += commande[lacet];
-	commande_derierre_gauche += commande[lacet];
+	commande_devant_droit += commande_vit[lacet];
+	commande_derierre_gauche += commande_vit[lacet];
 
 	// Saturation de la commande
 	commande_devant_droit = saturation(commande_devant_droit ,1100,1900);

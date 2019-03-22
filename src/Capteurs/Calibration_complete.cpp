@@ -491,9 +491,9 @@ int read_accelerometer_avg (MPU9250 *sub_sensor_combined , double accel_avg[3] ,
         float accel_ema[3] = { 0.0f , 0.0f , 0.0f } ;
 
 		mpu.getMotion9(&accel_ema[0], &accel_ema[1], &accel_ema[2], &gx, &gy, &gz,&mx, &my, &mz);
-		accel_ema[0] -= 0.674362;
-		accel_ema[1] -= 0.439529;
-		accel_ema[2] -= 0.9725;
+		accel_ema[0] -= 0.943294;
+		accel_ema[1] += 0.096047;
+		accel_ema[2] -= 1.45597;
         for ( int i = 0 ; i < 3 ; i++ )
             accel_sum[i] += accel_ema[i] ; // On fait la somme des trois valeurs.
 
