@@ -346,23 +346,23 @@ void calcul_valeur_commande_moteur()
 	if (commande_vit[tangage] < 0)
 	{
 		commande_devant_droit -= commande_vit[tangage];
-		commande_devant_gauche -= commande_vit[tangage];
+		commande_derierre_droit -= commande_vit[tangage];
 	}
 	if (commande_vit[roulis] > 0)
 	{
 
-		commande_derierre_droit += commande_vit[roulis];
+		commande_devant_gauche += commande_vit[roulis];
 		commande_devant_droit += commande_vit[roulis];
 	}
 	if (commande_vit[tangage] > 0)
 	{
-		commande_derierre_droit += commande_vit[tangage];
+		commande_devant_gauche += commande_vit[tangage];
 		commande_derierre_gauche += commande_vit[tangage];
 	}
 	if (commande_vit[roulis] < 0)
 	{
 		commande_derierre_gauche -= commande_vit[roulis];
-		commande_devant_gauche -= commande_vit[roulis];
+		commande_derierre_droit -= commande_vit[roulis];
 	}
 	//printf("commande[lacet] = %f \n", commande[lacet]);
 	commande_vit[lacet] = 0 ; //TODO
