@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     }
 	sleep(10);
     // call aFunction whenever GPIO 4 changes state
-    gpioSetAlertFunc(13, gaz);
+    gpioSetAlertFunc(16, gaz);
 	gpioSetAlertFunc(23, tangage);
 	gpioSetAlertFunc(24, lacet);
 	gpioSetAlertFunc(25, roulis);

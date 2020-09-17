@@ -23,7 +23,7 @@ Biquad::Biquad() {
     type = bq_type_lowpass;
     a0 = 1.0;
     a1 = a2 = b1 = b2 = 0.0;
-    Fc = 0.50;
+    Fc = 0.02;
     Q = 0.707;
     peakGain = 0.0;
     z1 = z2 = 0.0;

@@ -38,10 +38,11 @@
 /// Author: Leonard Hall <LeonardTHall@gmail.com>
 
 #include "LowPassFilter2p.hpp"
+#include <iostream>
 #include <math.h>
+using namespace std;
 
-namespace math
-{	
+
 LowPassFilter2p::LowPassFilter2p(float sample_freq, float cutoff_freq)
 {
         // set initial parameters
@@ -92,5 +93,4 @@ float LowPassFilter2p::reset(float sample) {
     return apply(sample);
 }
 
-} // namespace math
 

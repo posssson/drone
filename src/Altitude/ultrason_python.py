@@ -8,8 +8,8 @@ print "+-----------------------------------------------------------+"
 print "|   Mesure de distance par le capteur ultrasonore HC-SR04   |"
 print "+-----------------------------------------------------------+"
 
-Trig = 20          # Entree Trig du HC-SR04 branchee au GPIO 23
-Echo = 16         # Sortie Echo du HC-SR04 branchee au GPIO 24
+Trig = 21          # Entree Trig du HC-SR04 branchee au GPIO 23
+Echo = 26         # Sortie Echo du HC-SR04 branchee au GPIO 24
 
 GPIO.setup(Trig,GPIO.OUT)
 GPIO.setup(Echo,GPIO.IN)
@@ -20,7 +20,7 @@ repet = input("Entrez un nombre de repetitions de mesure : ")
 
 for x in range(repet):    # On prend la mesure "repet" fois
 
-   time.sleep(1)       # On la prend toute les 1 seconde
+   time.sleep(0.001)       # On la prend toute les 1 seconde
 
    GPIO.output(Trig, True)
    time.sleep(0.00001)

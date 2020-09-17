@@ -1,3 +1,5 @@
 g++ -Wall -std=c++11 MPU9250.cpp I2Cdev.cpp Calibration.cpp -lwiringPi
 
-g++ -Wall  -std=c++11 MPU9250.cpp I2Cdev.cpp conversion/rotation.cpp mathlib/mathlib_onera_v3.h Calibration_complete.cpp -lwiringPi
+g++ -std=c++11 MPU9250.cpp I2Cdev.cpp conversion/rotation.cpp mathlib/mathlib_onera_v3.h Calibration_complete.cpp -lwiringPi -lpigpio -lrt
+
+sudo killall Servos Altitude Capteurs Gps Init Clavier Optim 

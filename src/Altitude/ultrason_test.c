@@ -27,8 +27,8 @@
     #define BLOCK_SIZE (4*1024)
 
     // Easy to change GPIOS
-    #define GPIO_TRIG 21
-    #define GPIO_ECHO 16
+    #define GPIO_TRIG 16
+    #define GPIO_ECHO 26
 
     int  mem_fd     = 0;
     unsigned char *gpio_mmap = NULL;
@@ -58,11 +58,13 @@
 
     INP_GPIO(GPIO_ECHO); //input for echo pin
     printf("Waiting For Sensor To Settle\n");
-    nsleep(500000);
+    usleep(500000);
     printf("Settle OK\n");
+    while(1)
+    {
 //Sens 10us to trigger
     GPIO_SET(GPIO_TRIG);
-    nsleep(10); // send pulse 10us to trigger
+    usleep(10); // send pulse 10us to trigger
     GPIO_CLR(GPIO_TRIG);
 
     clock_gettime(CLOCK_REALTIME, &start_echo);
@@ -90,7 +92,7 @@ echo_time /= 1000000000;//sec
 distance = (echo_time*17150); //cm
 
 printf("Distance: %.2f cm\n", distance);
-
+    }
 close_io();
 
 return 0;

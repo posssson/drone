@@ -38,10 +38,13 @@
 /// Author: Leonard Hall <LeonardTHall@gmail.com>
 /// Adapted for PX4 by Andrew Tridgell
 
-#pragma once
+//#pragma once
+ #include <iostream>
+#include <math.h>
+using namespace std;
+#ifndef LowPassFilter2p_h
+#define LowPassFilter2p_h
 
-namespace math
-{
 class LowPassFilter2p
 {
 public:
@@ -84,4 +87,4 @@ private:
     float           _delay_element_2;        // buffered sample -2
 };
 
-} // namespace math
+#endif

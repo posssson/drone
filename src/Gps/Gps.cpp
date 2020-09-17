@@ -32,6 +32,7 @@ void gps()
 	i=0;
 	while (1) // Tant que la valeur est pas $
 	{
+		usleep(2);
 		char_gps = (char)serialGetchar(fd);
 		if (char_gps.compare(dollar_test)==0)
 		{
@@ -59,7 +60,7 @@ void gps()
 	    }
 	    if (GPGGA == 0)
 	    {
-	   // std::cout <<"token "<< token << std::endl;
+	   	//std::cout <<"token "<< token << std::endl;
 	    gps_values[i]=token;
 	    gps_message.erase(0, pos + delimiter.length());
 	    i++;
@@ -68,6 +69,7 @@ void gps()
 	    {
 	    	break;
 	    }
+		usleep(2);
 	}
 	GPGGA = 1;
 
@@ -92,7 +94,7 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 
-		sleep(0.2);
+		usleep(1000);
 		gps();
 		//ROS_INFO("fin gps");
 		ros::spinOnce();

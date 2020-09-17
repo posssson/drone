@@ -1,6 +1,6 @@
-//=============================================================================================
+//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // MadgwickAHRS.c
-//=============================================================================================
+//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 //
 // Implementation of Madgwick's IMU and AHRS algorithms.
 // See: http://www.x-io.co.uk/open-source-imu-and-ahrs-algorithms/
@@ -9,12 +9,12 @@
 // provided under the GNU General Public Licence unless an alternative licence
 // is provided in source."
 //
-// Date			Author          Notes
-// 29/09/2011	SOH Madgwick    Initial release
+// Date			Author   Notes
+// 29/09/2011	SOH Madgwick Initial release
 // 02/10/2011	SOH Madgwick	Optimised for reduced CPU load
 // 19/02/2012	SOH Madgwick	Magnetometer measurement is normalised
 //
-//=============================================================================================
+//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
 //-------------------------------------------------------------------------------------------
 // Header files
@@ -25,11 +25,11 @@
 //-------------------------------------------------------------------------------------------
 // Definitions
 
-#define sampleFreqDef   512.0f          // sample frequency in Hz
-#define betaDef        0.025f            // 2 * proportional gain
+#define sampleFreqDef 1000.0f   // sample frequency in Hz
+#define betaDef  0.5f   // 2 * proportional gain
 
 
-//============================================================================================
+//= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 // Functions
 
 //-------------------------------------------------------------------------------------------
@@ -237,13 +237,18 @@ void Madgwick::updateIMU(float gx, float gy, float gz, float ax, float ay, float
 // See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
 
 float Madgwick::invSqrt(float x) {
-    float halfx = 0.5f * x;
-    float y = x;
-    int32_t i = *(int32_t *)&y;
-    i = 0x5f3759df - (i>>1);
-    y = *(float*)&i;
-    y = y * (1.5f - (halfx * y * y));
-    return y;
+	/*float halfx = 0.5f * x;
+	float y = x;
+	int32_t i = *(int32_t *)&y;
+	i = 0x5f3759df - (i>>1);
+	y = *(float*)&i;
+	y = y * (1.5f - (halfx * y * y));
+	return y;
+	*/
+	uint32_t i = 0x5F1F1412 - (*(uint32_t*)&x >> 1);
+	float tmp = *(float*)&i;
+	return tmp * (1.69000231f - 0.714158168f * x * tmp * tmp);
+	
 }
 
 //-------------------------------------------------------------------------------------------
