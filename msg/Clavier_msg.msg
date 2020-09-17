@@ -4,3 +4,9 @@ float32 kd
 float32 kdd
 float32 kii
 float32 kpp
+float32 ka
+float32 kia
+float32 kda
+float32 kl
+float32 kil
+float32 kdl
