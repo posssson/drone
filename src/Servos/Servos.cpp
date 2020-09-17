@@ -552,6 +552,7 @@ void Calcul()
 				}
 				else
 				{
+					consigne[lacet] = 0;
 					temps_haut_lacet = 0;
 				}
 				
@@ -627,7 +628,7 @@ void Calcul()
 			{
 				//ROS_ERROR(" TU VOLES TROP HAUT ");
 				securiteAltitude -= 100 / frequenceLoop; // Si probleme de reception gaz on reduit le gaz de 100 par seconde. 
-				gaz = securiteAltitude;
+				//gaz = securiteAltitude;
 			}
 			else
 			{
@@ -674,12 +675,13 @@ void Calcul()
 				gpioPWM(moteur_devant_droit, 1000);
 				arret = 0;
 				ROS_ERROR("SECURITE\n");
-				while(gaz >1100)
+				while(gaz >1080)
 				{
 					usleep(100);
 					gaz = temps_haut_gaz;
 					
 				}
+				ROS_INFO("FIN SECURITE\n");
 			}
 			else
 			{
@@ -745,49 +747,7 @@ void Calcul()
 				msg_data.frequence_capteur = frequence_capteur;
 				_pub_msg_data.publish(msg_data);
 			}
-			else // Send only 0 in data
-			{
-				for (int i = 0 ; i < 4 ; i++)
-				{
-					msg_data.Kp[i] = Kp[i];
-					msg_data.Ki[i] = Ki[i];
-					msg_data.Kd[i] = Kd[i];
-					msg_data.Kp_vit[i] = Kp_vit[i];
-					msg_data.Ki_vit[i] = Ki_vit[i];
-					msg_data.Kd_vit[i] = Kd_vit[i];
-					msg_data.consigne[i] = consigne[i];
-					msg_data.erreur[i] = 0;
-					msg_data.somme_erreurs[i] = 0;
-					msg_data.variation_erreur[i] = 0;
-					msg_data.erreur_vit[i] = 0;
-					msg_data.somme_erreurs_vit[i] = 0;
-					msg_data.variation_erreur_vit[i] = 0;
-				}
-				for (int i = 0 ; i < 3 ; i++)
-				{
-					msg_data.altitude_capteur[i] = 0;
-				}
-				for (int i = 0 ; i < 6 ; i++)
-				{
-					msg_data.accelMag[i] = 0;
-					msg_data.attitude[i] = 0;
-				}
-				for (int i = 0 ; i < 2 ; i++)
-				{
-					msg_data.altitude_vit[i] = 0;
-				}
-				
-				msg_data.temps_proc = temps_proc;
-				msg_data.commande_devant_droit = 0;
-				msg_data.commande_devant_gauche = 0;
-				msg_data.commande_derierre_droit = 0;
-				msg_data.commande_derierre_gauche = 0;
-				msg_data.init_lacet = init_lacet;
-				msg_data.gaz = 0;
-				msg_data.frequence_capteur = frequence_capteur;
-				_pub_msg_data.publish(msg_data);
-				
-			}
+			
 			if (gaz > 1100 && gaz < 2000 && changement_consigne) {
 				it_optim ++;
 				
